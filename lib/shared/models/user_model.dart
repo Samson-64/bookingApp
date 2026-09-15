@@ -39,6 +39,15 @@ class AppUser {
     );
   }
 
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'name': name,
+        'email': email,
+        'role': role.name.toUpperCase(),
+        'person_id': personId,
+        'created_at': createdAt.toIso8601String(),
+      };
+
   Map<String, dynamic> toInsertMap() => {
         'email': email,
       };
