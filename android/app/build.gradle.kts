@@ -7,6 +7,7 @@ plugins {
 android {
     namespace = "com.example.bookingapp"
     compileSdk = 36
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -16,7 +17,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.bookingapp"
-        minSdk = flutter.minSdkVersion
+        minSdk = 24
         targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
