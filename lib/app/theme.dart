@@ -149,10 +149,11 @@ class AppTheme {
         filled: true,
         fillColor: Colors.white,
         hintStyle: const TextStyle(color: AppColors.slate400, fontSize: 14),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        labelStyle:
-            const TextStyle(color: AppColors.slate500, fontSize: 13),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+        labelStyle: const TextStyle(color: AppColors.slate500, fontSize: 13),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.slate200),
@@ -163,7 +164,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.teal600, width: 1.5),
+          borderSide: const BorderSide(color: AppColors.slate900, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
