@@ -1,56 +1,32 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../../shared/models/availability_model.dart';
 import '../../shared/models/parking_space_model.dart';
+import '../network/api_client.dart';
 
 class ParkingService {
   ParkingService._();
   static final ParkingService instance = ParkingService._();
 
-  SupabaseClient get _client => Supabase.instance.client;
+  ApiClient get _api => ApiClient.instance;
 
   Future<List<ParkingSpace>> fetchSpaces() async {
-    final response = await _client.from('parking_spaces').select().order('location');
-    return (response as List<dynamic>)
-        .map((e) => ParkingSpace.fromMap(Map<String, dynamic>.from(e)))
+    final res = await _api.get<List<dynamic>>('/api/parking/spaces');
+    return (res.data ?? const [])
+        .map((e) => ParkingSpace.fromMap(Map<String, dynamic>.from(e as Map)))
         .toList();
   }
 
   /// Availability of a single space for a specific date based on overlapping
-  /// bookings (spaces have no `is_available` column — it is derived).
+  /// bookings (the backend derives availability server-side).
   Future<Availability> fetchAvailability({
     required String spaceId,
     required String date,
   }) async {
-    final response = await _client
-        .from('bookings')
-        .select('start_time,end_time')
-        .eq('parking_space_id', spaceId)
-        .eq('date', date)
-        .inFilter('status', ['PENDING', 'CONFIRMED']);
-
-    return Availability(
-      working: true,
-      scheduleStart: BookingServiceRef.workStart,
-      scheduleEnd: BookingServiceRef.workEnd,
-      existing: (response as List<dynamic>)
-          .map((e) => TimeWindow(
-                startTime: _norm(e['start_time']),
-                endTime: _norm(e['end_time']),
-              ))
-          .toList(),
+    final res = await _api.get<Map<String, dynamic>>(
+      '/api/parking/spaces/$spaceId/availability',
+      queryParameters: {'date': date},
+    );
+    return Availability.fromMap(
+      Map<String, dynamic>.from(res.data ?? const {}),
     );
   }
-
-  static String _norm(dynamic v) {
-    final s = v?.toString() ?? '00:00';
-    return s.length >= 5 ? s.substring(0, 5) : s;
-  }
-}
-
-/// Small bridge so ParkingService can share the fixed working hours without
-/// importing the booking service directly.
-class BookingServiceRef {
-  static const String workStart = '09:00';
-  static const String workEnd = '17:00';
 }
