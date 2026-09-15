@@ -70,29 +70,29 @@ class Booking {
       : (space?.location.isNotEmpty == true ? space!.location : 'Parking Facility');
 
   factory Booking.fromMap(Map<String, dynamic> map) {
-    final rawPerson = map['people'];
-    final rawSpace = map['parking_spaces'];
-    final rawUser = map['users'];
+    final rawPerson = map['person'] ?? map['people'];
+    final rawSpace = map['parking_space'] ?? map['parking_spaces'];
+    final rawClient = map['user'] ?? map['users'];
+    final rawUserId = rawClient is Map<String, dynamic> ? rawClient['id'] : map['user_id'];
 
     return Booking(
       id: map['id'].toString(),
-      userId: map['user_id'].toString(),
+      userId: rawUserId?.toString() ?? '',
       type: bookingTypeFromString(map['type'].toString()),
       status: bookingStatusFromString(map['status']?.toString() ?? ''),
       date: DateTime.parse(map['date']),
-      startTime: _normalizeTime(map['start_time']),
-      endTime: _normalizeTime(map['end_time']),
+      startTime: _normalizeTime(map['startTime'] ?? map['start_time']),
+      endTime: _normalizeTime(map['endTime'] ?? map['end_time']),
       reference: map['reference']?.toString() ?? '',
       person: rawPerson is Map<String, dynamic> ? Person.fromMap(rawPerson) : null,
       space: rawSpace is Map<String, dynamic> ? ParkingSpace.fromMap(rawSpace) : null,
-      clientName: rawUser is Map<String, dynamic> ? rawUser['name']?.toString() : null,
-      clientEmail: rawUser is Map<String, dynamic> ? rawUser['email']?.toString() : null,
+      clientName: rawClient is Map<String, dynamic> ? rawClient['name']?.toString() : null,
+      clientEmail: rawClient is Map<String, dynamic> ? rawClient['email']?.toString() : null,
     );
   }
 
   static String _normalizeTime(dynamic value) {
     final s = value?.toString() ?? '00:00';
-    // Supabase returns 'HH:MM:SS'; keep 'HH:MM'
     return s.length >= 5 ? s.substring(0, 5) : s;
   }
 }
