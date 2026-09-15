@@ -1,20 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app/theme.dart';
-import 'core/constants/supabase_constants.dart';
-import 'core/services/supabase_service.dart';
+import 'core/services/auth_service.dart';
+import 'core/storage/token_storage.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/dashboard/screens/home_shell.dart';
 import 'features/provider/screens/specialist_dashboard.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  await Supabase.initialize(
-    url: SupabaseConstants.url,
-    publishableKey: SupabaseConstants.anonKey,
-  );
 
   runApp(const BookingApp());
 }
@@ -56,7 +50,8 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future<void>.delayed(const Duration(milliseconds: 350));
     if (!mounted) return;
 
-    final hasUser = Supabase.instance.client.auth.currentUser != null;
+    final hasUser = await TokenStorage.instance.hasToken();
+    if (!mounted) return;
     if (!hasUser) {
       Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
       return;
