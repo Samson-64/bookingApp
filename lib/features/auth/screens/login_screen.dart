@@ -159,9 +159,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     'By continuing, you agree to use the portal responsibly',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.slate400,
-                          fontSize: 11,
-                        ),
+                      color: AppColors.slate400,
+                      fontSize: 11,
+                    ),
                   ),
                 ],
               ),
@@ -184,16 +184,19 @@ class _LoginScreenState extends State<LoginScreen> {
             borderRadius: BorderRadius.circular(12),
           ),
           alignment: Alignment.center,
-          child: const Icon(Icons.calendar_month_rounded,
-              color: Colors.white, size: 22),
+          child: const Icon(
+            Icons.calendar_month_rounded,
+            color: Colors.white,
+            size: 22,
+          ),
         ),
         const SizedBox(width: 10),
         Text(
           'Booking Portal',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.slate900,
-                fontSize: 22,
-              ),
+            color: AppColors.slate900,
+            fontSize: 22,
+          ),
         ),
       ],
     );
@@ -206,9 +209,9 @@ class _LoginScreenState extends State<LoginScreen> {
         Text(
           isRegister ? 'Create your account' : 'Welcome Back',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppColors.slate900,
-                fontSize: 26,
-              ),
+            color: AppColors.slate900,
+            fontSize: 26,
+          ),
         ),
         const SizedBox(height: 6),
         Text(
@@ -216,9 +219,9 @@ class _LoginScreenState extends State<LoginScreen> {
               ? 'Start organising your bookings in just a few moments.'
               : 'Sign in to continue to your workspace.',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.slate500,
-                fontSize: 13,
-              ),
+            color: AppColors.slate500,
+            fontSize: 13,
+          ),
         ),
       ],
     );
@@ -340,7 +343,9 @@ class _LoginScreenState extends State<LoginScreen> {
           suffix: IconButton(
             onPressed: () => setState(() => _showPassword = !_showPassword),
             icon: Icon(
-              _showPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+              _showPassword
+                  ? Icons.visibility_outlined
+                  : Icons.visibility_off_outlined,
               color: AppColors.slate400,
               size: 20,
             ),
@@ -362,8 +367,11 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.error_outline_rounded,
-              color: AppColors.rose600, size: 18),
+          const Icon(
+            Icons.error_outline_rounded,
+            color: AppColors.rose600,
+            size: 18,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -404,8 +412,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 Text(
                   isRegister
                       ? (_accountType == _AccountType.provider
-                          ? 'Create provider account'
-                          : 'Create account')
+                            ? 'Create provider account'
+                            : 'Create account')
                       : 'Sign In',
                 ),
                 const SizedBox(width: 8),
@@ -497,10 +505,10 @@ class _AccountTypeCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: active ? AppColors.teal50 : Colors.white,
+          color: active ? Colors.white : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: active ? AppColors.teal600 : AppColors.slate200,
+            color: active ? AppColors.slate900 : AppColors.slate200,
             width: active ? 1.5 : 1,
           ),
         ),
@@ -514,8 +522,11 @@ class _AccountTypeCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
               alignment: Alignment.center,
-              child: Icon(icon,
-                  color: active ? Colors.white : AppColors.slate500, size: 18),
+              child: Icon(
+                icon,
+                color: active ? Colors.white : AppColors.slate500,
+                size: 18,
+              ),
             ),
             const SizedBox(width: 10),
             Expanded(
