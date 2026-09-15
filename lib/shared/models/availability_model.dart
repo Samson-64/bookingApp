@@ -25,21 +25,33 @@ class Availability {
   }
 
   factory Availability.fromMap(Map<String, dynamic> map) {
+    final schedule = map['schedule'];
+    final Map<String, dynamic> scheduleMap =
+        schedule is Map<String, dynamic> ? schedule : const {};
+    final existingRaw = (map['existing'] ?? map['bookings'] ?? const []) as List<dynamic>;
+
     return Availability(
       working: map['working'] == true,
-      scheduleStart: map['schedule_start']?.toString() ?? '09:00',
-      scheduleEnd: map['schedule_end']?.toString() ?? '17:00',
-      existing: (map['existing'] as List<dynamic>? ?? const [])
-          .map((e) => TimeWindow(
-                startTime: _norm(e is Map ? e['start_time'] : null),
-                endTime: _norm(e is Map ? e['end_time'] : null),
-              ))
+      scheduleStart:
+          _norm(scheduleMap['startTime'] ?? scheduleMap['start_time'] ?? map['schedule_start']) ??
+              '09:00',
+      scheduleEnd:
+          _norm(scheduleMap['endTime'] ?? scheduleMap['end_time'] ?? map['schedule_end']) ??
+              '17:00',
+      existing: existingRaw
+          .map((e) => e is Map
+              ? TimeWindow(
+                  startTime: _norm(e['startTime'] ?? e['start_time']) ?? '00:00',
+                  endTime: _norm(e['endTime'] ?? e['end_time']) ?? '00:00',
+                )
+              : const TimeWindow(startTime: '00:00', endTime: '00:00'))
           .toList(),
     );
   }
 
-  static String _norm(dynamic v) {
-    final s = v?.toString() ?? '00:00';
+  static String? _norm(dynamic v) {
+    if (v == null) return null;
+    final s = v.toString();
     return s.length >= 5 ? s.substring(0, 5) : s;
   }
 
