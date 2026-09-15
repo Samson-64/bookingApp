@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/theme.dart';
-import '../../../core/services/supabase_service.dart';
+import '../../../core/errors/api_exception.dart';
+import '../../../core/services/auth_service.dart';
 import '../../../shared/models/user_model.dart';
 
 enum _AuthMode { login, register }
@@ -83,31 +83,24 @@ class _LoginScreenState extends State<LoginScreen> {
         await AuthService.instance.signInWithPassword(email, password);
         await _navigateAfterSignIn();
       } else {
-        final userId = _accountType == _AccountType.provider
-            ? await AuthService.instance.registerProvider(
-                name: _nameController.text.trim(),
-                position: _positionController.text.trim(),
-                email: email,
-                password: password,
-              )
-            : await AuthService.instance.registerClient(
-                name: _nameController.text.trim(),
-                email: email,
-                password: password,
-              );
-
-        if (userId != null) {
-          await _navigateAfterSignIn();
+        if (_accountType == _AccountType.provider) {
+          await AuthService.instance.registerProvider(
+            name: _nameController.text.trim(),
+            position: _positionController.text.trim(),
+            email: email,
+            password: password,
+          );
         } else {
-          // Email confirmation required by Supabase.
-          if (mounted) {
-            _switchMode(_AuthMode.login);
-            _showConfirmation();
-          }
+          await AuthService.instance.registerClient(
+            name: _nameController.text.trim(),
+            email: email,
+            password: password,
+          );
         }
+        await _navigateAfterSignIn();
       }
-    } on AuthException catch (error) {
-      debugPrint('AuthException: ${error.message}');
+    } on ApiException catch (error) {
+      debugPrint('ApiException: ${error.message}');
       if (mounted) setState(() => _error = error.message);
     } catch (error) {
       debugPrint('Unexpected Error: $error');
@@ -127,16 +120,6 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
     final target = (profile?.isSpecialist ?? false) ? '/provider' : '/home';
     Navigator.of(context).pushNamedAndRemoveUntil(target, (route) => false);
-  }
-
-  void _showConfirmation() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Account created. Please check your email to confirm, then sign in.',
-        ),
-      ),
-    );
   }
 
   @override
