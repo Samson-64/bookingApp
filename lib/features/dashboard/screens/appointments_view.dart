@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../app/theme.dart';
 import '../../../core/services/booking_service.dart';
 import '../../../shared/models/availability_model.dart';
@@ -32,9 +33,23 @@ class _AppointmentsViewState extends State<AppointmentsView> {
   _BookingResult? _result;
 
   static const _timeOptions = [
-    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-    '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
-    '15:00', '15:30', '16:00', '16:30', '17:00',
+    '09:00',
+    '09:30',
+    '10:00',
+    '10:30',
+    '11:00',
+    '11:30',
+    '12:00',
+    '12:30',
+    '13:00',
+    '13:30',
+    '14:00',
+    '14:30',
+    '15:00',
+    '15:30',
+    '16:00',
+    '16:30',
+    '17:00',
   ];
 
   @override
@@ -70,9 +85,9 @@ class _AppointmentsViewState extends State<AppointmentsView> {
     try {
       _availability = await BookingService.instance
           .fetchAppointmentAvailability(
-        personId: _selectedPerson!.id,
-        date: dateKey(_selectedDate!),
-      );
+            personId: _selectedPerson!.id,
+            date: dateKey(_selectedDate!),
+          );
     } catch (e) {
       _availability = const Availability(working: false);
     }
@@ -87,8 +102,8 @@ class _AppointmentsViewState extends State<AppointmentsView> {
         _startTime != _endTime;
   }
 
-  List<String> get _startOptions => _timeOptions.sublist(
-      0, _timeOptions.length - 1);
+  List<String> get _startOptions =>
+      _timeOptions.sublist(0, _timeOptions.length - 1);
 
   List<String> get _endOptions {
     if (_startTime == null) return _timeOptions.sublist(1);
@@ -115,7 +130,8 @@ class _AppointmentsViewState extends State<AppointmentsView> {
           _result = _BookingResult(
             reference: booking.reference,
             personName: booking.person?.name ?? _selectedPerson!.name,
-            personPosition: booking.person?.position ?? _selectedPerson!.position,
+            personPosition:
+                booking.person?.position ?? _selectedPerson!.position,
             date: dateKey(_selectedDate!),
             startTime: _startTime!,
             endTime: _endTime!,
@@ -138,12 +154,19 @@ class _AppointmentsViewState extends State<AppointmentsView> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.error_outline, color: AppColors.rose600, size: 36),
+                const Icon(
+                  Icons.error_outline,
+                  color: AppColors.rose600,
+                  size: 36,
+                ),
                 const SizedBox(height: 12),
                 Text(
                   _submitError ?? 'Failed to book',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 14, color: AppColors.rose600),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.rose600,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 SizedBox(
@@ -204,7 +227,9 @@ class _AppointmentsViewState extends State<AppointmentsView> {
             _summaryRow('Role', _selectedPerson?.position ?? ''),
             _summaryRow(
               'Date',
-              _selectedDate != null ? formatLongDate(dateKey(_selectedDate!)) : '',
+              _selectedDate != null
+                  ? formatLongDate(dateKey(_selectedDate!))
+                  : '',
             ),
             _summaryRow(
               'Time',
@@ -255,7 +280,10 @@ class _AppointmentsViewState extends State<AppointmentsView> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontSize: 13, color: AppColors.slate500)),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 13, color: AppColors.slate500),
+          ),
           Flexible(
             child: Text(
               value,
@@ -281,8 +309,8 @@ class _AppointmentsViewState extends State<AppointmentsView> {
       child: _loading
           ? const Spinner(label: 'Loading providers…')
           : _error != null
-              ? ErrorState(message: _error!, onRetry: _load)
-              : _buildWizard(),
+          ? ErrorState(message: _error!, onRetry: _load)
+          : _buildWizard(),
     );
   }
 
@@ -303,9 +331,7 @@ class _AppointmentsViewState extends State<AppointmentsView> {
         // Step 1: Provider
         _stepHeader(1, 'Select Provider'),
         const SizedBox(height: 8),
-        ..._people.map(
-          (p) => _providerCard(p),
-        ),
+        ..._people.map((p) => _providerCard(p)),
         const SizedBox(height: 20),
 
         // Step 2: Date
@@ -316,10 +342,7 @@ class _AppointmentsViewState extends State<AppointmentsView> {
           const SizedBox(height: 4),
           Text(
             formatLongDate(dateKey(_selectedDate!)),
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppColors.slate500,
-            ),
+            style: const TextStyle(fontSize: 12, color: AppColors.slate500),
           ),
         ],
         const SizedBox(height: 20),
@@ -362,7 +385,7 @@ class _AppointmentsViewState extends State<AppointmentsView> {
             ),
           ),
           const SizedBox(height: 12),
-Row(
+          Row(
             children: [
               Expanded(
                 child: _timeDropdown(
@@ -490,7 +513,10 @@ Row(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontSize: 13, color: AppColors.slate500)),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 13, color: AppColors.slate500),
+          ),
           Text(
             value,
             style: const TextStyle(
@@ -545,10 +571,10 @@ Row(
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: selected ? AppColors.teal50 : Colors.white,
+          color: selected ? AppColors.slate50 : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selected ? AppColors.teal600 : AppColors.slate200,
+            color: selected ? AppColors.slate900 : AppColors.slate200,
             width: selected ? 1.5 : 1,
           ),
         ),
@@ -558,7 +584,7 @@ Row(
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: selected ? AppColors.teal600 : AppColors.slate100,
+                color: selected ? AppColors.slate900 : AppColors.slate900,
                 borderRadius: BorderRadius.circular(10),
               ),
               alignment: Alignment.center,
@@ -595,18 +621,40 @@ Row(
               ),
             ),
             if (selected)
-              const Icon(Icons.check_circle, color: AppColors.teal600, size: 20),
+              const Icon(
+                Icons.check_circle,
+                color: AppColors.slate900,
+                size: 20,
+              ),
           ],
         ),
       ),
     );
   }
 
-  static const _weekdayLabels = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+  static const _weekdayLabels = [
+    'SUN',
+    'MON',
+    'TUE',
+    'WED',
+    'THU',
+    'FRI',
+    'SAT',
+  ];
 
   static const _monthLabels = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
 
   Widget _buildCalendar() {
@@ -616,7 +664,8 @@ Row(
     final firstDay = DateTime(month.year, month.month, 1);
     final daysInMonth = DateTime(month.year, month.month + 1, 0).day;
     final leadingBlanks = firstDay.weekday % 7;
-    final isCurrentMonth = month.year == today.year && month.month == today.month;
+    final isCurrentMonth =
+        month.year == today.year && month.month == today.month;
 
     return Container(
       decoration: BoxDecoration(
@@ -634,9 +683,8 @@ Row(
                   onPressed: isCurrentMonth
                       ? null
                       : () => setState(() {
-                            _visibleMonth =
-                                DateTime(month.year, month.month - 1);
-                          }),
+                          _visibleMonth = DateTime(month.year, month.month - 1);
+                        }),
                   icon: const Icon(Icons.chevron_left, size: 22),
                   color: AppColors.slate600,
                   disabledColor: AppColors.slate300,
@@ -719,7 +767,8 @@ Row(
     required DateTime? selectedDate,
   }) {
     final isToday = dateKey(date) == dateKey(today);
-    final isSelected = selectedDate != null && dateKey(date) == dateKey(selectedDate);
+    final isSelected =
+        selectedDate != null && dateKey(date) == dateKey(selectedDate);
     final isPast = date.isBefore(today);
     final enabled = !isPast;
 
@@ -741,10 +790,10 @@ Row(
             color: isSelected
                 ? AppColors.slate900
                 : isToday
-                    ? AppColors.teal50
-                    : null,
+                ? AppColors.slate100
+                : null,
             border: isToday && !isSelected
-                ? Border.all(color: AppColors.teal600, width: 1.5)
+                ? Border.all(color: AppColors.slate900, width: 1.5)
                 : null,
           ),
           alignment: Alignment.center,
@@ -759,10 +808,10 @@ Row(
                   color: isSelected
                       ? Colors.white
                       : isToday
-                          ? AppColors.teal600
-                          : enabled
-                              ? AppColors.slate900
-                              : AppColors.slate300,
+                      ? AppColors.slate900
+                      : enabled
+                      ? AppColors.slate900
+                      : AppColors.slate300,
                 ),
               ),
               if (isToday && !isSelected)
@@ -771,7 +820,7 @@ Row(
                   height: 4,
                   margin: const EdgeInsets.only(top: 2),
                   decoration: const BoxDecoration(
-                    color: AppColors.teal600,
+                    color: AppColors.slate600,
                     shape: BoxShape.circle,
                   ),
                 ),
