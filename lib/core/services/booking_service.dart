@@ -1,10 +1,7 @@
-import 'dart:math';
-
-import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../../shared/models/availability_model.dart';
 import '../../shared/models/booking_model.dart';
 import '../../shared/models/person_model.dart';
+import '../network/api_client.dart';
 
 /// Booking primitives used across the app. All providers share a fixed
 /// working-hours window (09:00–17:00) as decided for the current build.
@@ -15,37 +12,28 @@ class BookingService {
   static const String workStart = '09:00';
   static const String workEnd = '17:00';
 
-  SupabaseClient get _client => Supabase.instance.client;
+  ApiClient get _api => ApiClient.instance;
 
   Future<List<Booking>> fetchMyBookings() async {
-    final response = await _client
-        .from('bookings')
-        .select('*, people(*), parking_spaces(*), users(name,email)')
-        .eq('user_id', _client.auth.currentUser!.id)
-        .order('date', ascending: false)
-        .order('start_time', ascending: false);
-
-    return (response as List<dynamic>)
-        .map((e) => Booking.fromMap(Map<String, dynamic>.from(e)))
+    final res = await _api.get<List<dynamic>>('/api/bookings');
+    return (res.data ?? const [])
+        .map((e) => Booking.fromMap(Map<String, dynamic>.from(e as Map)))
         .toList();
   }
 
   Future<List<Booking>> fetchSpecialistBookings(String personId) async {
-    final response = await _client
-        .from('bookings')
-        .select('*, people(*), parking_spaces(*), users(name,email)')
-        .eq('person_id', personId)
-        .order('date', ascending: false);
-
-    return (response as List<dynamic>)
-        .map((e) => Booking.fromMap(Map<String, dynamic>.from(e)))
+    // The backend resolves the specialist from the signed-in user's token,
+    // so the personId argument is not sent over the wire.
+    final res = await _api.get<List<dynamic>>('/api/specialist/my-appointments');
+    return (res.data ?? const [])
+        .map((e) => Booking.fromMap(Map<String, dynamic>.from(e as Map)))
         .toList();
   }
 
   Future<List<Person>> fetchProviders() async {
-    final response = await _client.from('people').select();
-    return (response as List<dynamic>)
-        .map((e) => Person.fromMap(Map<String, dynamic>.from(e)))
+    final res = await _api.get<List<dynamic>>('/api/people');
+    return (res.data ?? const [])
+        .map((e) => Person.fromMap(Map<String, dynamic>.from(e as Map)))
         .toList();
   }
 
@@ -53,23 +41,12 @@ class BookingService {
     required String personId,
     required String date,
   }) async {
-    final response = await _client
-        .from('bookings')
-        .select('start_time,end_time')
-        .eq('person_id', personId)
-        .eq('date', date)
-        .inFilter('status', ['PENDING', 'CONFIRMED']);
-
-    return Availability(
-      working: true,
-      scheduleStart: workStart,
-      scheduleEnd: workEnd,
-      existing: (response as List<dynamic>)
-          .map((e) => TimeWindow(
-                startTime: _norm(e['start_time']),
-                endTime: _norm(e['end_time']),
-              ))
-          .toList(),
+    final res = await _api.get<Map<String, dynamic>>(
+      '/api/appointments/availability',
+      queryParameters: {'person_id': personId, 'date': date},
+    );
+    return Availability.fromMap(
+      Map<String, dynamic>.from(res.data ?? const {}),
     );
   }
 
@@ -80,24 +57,17 @@ class BookingService {
     required String startTime,
     required String endTime,
   }) async {
-    final reference = _generateReference('APPT');
-
-    final response = await _client
-        .from('bookings')
-        .insert({
-          'user_id': userId,
-          'type': 'APPOINTMENT',
-          'person_id': personId,
-          'date': date,
-          'start_time': startTime,
-          'end_time': endTime,
-          'status': 'PENDING',
-          'reference': reference,
-        })
-        .select('*, people(*), parking_spaces(*)')
-        .single();
-
-    return Booking.fromMap(Map<String, dynamic>.from(response));
+    // The backend attaches the signed-in user from the token.
+    final res = await _api.post<Map<String, dynamic>>(
+      '/api/appointments',
+      data: {
+        'personId': personId,
+        'date': date,
+        'startTime': startTime,
+        'endTime': endTime,
+      },
+    );
+    return Booking.fromMap(Map<String, dynamic>.from(res.data ?? const {}));
   }
 
   Future<Booking> createParkingBooking({
@@ -107,42 +77,40 @@ class BookingService {
     required String startTime,
     required String endTime,
   }) async {
-    final reference = _generateReference('PK');
-
-    final response = await _client
-        .from('bookings')
-        .insert({
-          'user_id': userId,
-          'type': 'PARKING',
-          'parking_space_id': spaceId,
-          'date': date,
-          'start_time': startTime,
-          'end_time': endTime,
-          'status': 'PENDING',
-          'reference': reference,
-        })
-        .select('*, people(*), parking_spaces(*)')
-        .single();
-
-    return Booking.fromMap(Map<String, dynamic>.from(response));
+    // The backend attaches the signed-in user from the token.
+    final res = await _api.post<Map<String, dynamic>>(
+      '/api/parking/book',
+      data: {
+        'parkingSpaceId': spaceId,
+        'date': date,
+        'startTime': startTime,
+        'endTime': endTime,
+      },
+    );
+    return Booking.fromMap(Map<String, dynamic>.from(res.data ?? const {}));
   }
 
-  Future<void> updateStatus({
+  /// Updates a booking status (staff scope: any booking).
+  Future<Booking> updateStatus({
     required String bookingId,
     required String status,
   }) async {
-    await _client.from('bookings').update({'status': status}).eq('id', bookingId);
+    final res = await _api.patch<Map<String, dynamic>>(
+      '/api/bookings/$bookingId/status',
+      data: {'status': status},
+    );
+    return Booking.fromMap(Map<String, dynamic>.from(res.data ?? const {}));
   }
 
-  static String _generateReference(String prefix) {
-    final rand = Random.secure();
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    final code = List.generate(6, (_) => chars[rand.nextInt(chars.length)]).join();
-    return '$prefix-$code';
-  }
-
-  static String _norm(dynamic v) {
-    final s = v?.toString() ?? '00:00';
-    return s.length >= 5 ? s.substring(0, 5) : s;
+  /// Updates a booking status (specialist scope: own appointments only).
+  Future<Booking> updateSpecialistStatus({
+    required String bookingId,
+    required String status,
+  }) async {
+    final res = await _api.patch<Map<String, dynamic>>(
+      '/api/specialist/bookings/$bookingId/status',
+      data: {'status': status},
+    );
+    return Booking.fromMap(Map<String, dynamic>.from(res.data ?? const {}));
   }
 }
