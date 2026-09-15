@@ -22,6 +22,7 @@ class _AppointmentsViewState extends State<AppointmentsView> {
 
   Person? _selectedPerson;
   DateTime? _selectedDate;
+  DateTime? _visibleMonth;
   Availability? _availability;
   String? _startTime;
   String? _endTime;
@@ -39,6 +40,8 @@ class _AppointmentsViewState extends State<AppointmentsView> {
   @override
   void initState() {
     super.initState();
+    final now = DateTime.now();
+    _visibleMonth = DateTime(now.year, now.month);
     _load();
   }
 
@@ -308,7 +311,7 @@ class _AppointmentsViewState extends State<AppointmentsView> {
         // Step 2: Date
         _stepHeader(2, 'Select Date'),
         const SizedBox(height: 8),
-        _buildDateGrid(),
+        _buildCalendar(),
         if (_selectedDate != null) ...[
           const SizedBox(height: 4),
           Text(
@@ -599,56 +602,183 @@ Row(
     );
   }
 
-  Widget _buildDateGrid() {
-    final today = DateTime.now();
-    final dates = List.generate(14, (i) => today.add(Duration(days: i)));
-    return Wrap(
-      spacing: 6,
-      runSpacing: 6,
-      children: dates.map((d) {
-        final selected = _selectedDate != null &&
-            dateKey(d) == dateKey(_selectedDate!);
-        const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-        return GestureDetector(
-          onTap: () async {
-            setState(() => _selectedDate = d);
-            await _checkAvailability();
-          },
-          child: Container(
-            width: 44,
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            decoration: BoxDecoration(
-              color: selected ? AppColors.slate900 : Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: selected ? AppColors.slate900 : AppColors.slate200,
-              ),
-            ),
-            alignment: Alignment.center,
-            child: Column(
+  static const _weekdayLabels = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
+  static const _monthLabels = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+  ];
+
+  Widget _buildCalendar() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final month = _visibleMonth ?? DateTime(today.year, today.month);
+    final firstDay = DateTime(month.year, month.month, 1);
+    final daysInMonth = DateTime(month.year, month.month + 1, 0).day;
+    final leadingBlanks = firstDay.weekday % 7;
+    final isCurrentMonth = month.year == today.year && month.month == today.month;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.slate200),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
+            child: Row(
               children: [
-                Text(
-                  days[d.weekday % 7],
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w600,
-                    color: selected ? AppColors.slate400 : AppColors.slate500,
+                IconButton(
+                  onPressed: isCurrentMonth
+                      ? null
+                      : () => setState(() {
+                            _visibleMonth =
+                                DateTime(month.year, month.month - 1);
+                          }),
+                  icon: const Icon(Icons.chevron_left, size: 22),
+                  color: AppColors.slate600,
+                  disabledColor: AppColors.slate300,
+                  visualDensity: VisualDensity.compact,
+                  tooltip: 'Previous month',
+                ),
+                Expanded(
+                  child: Text(
+                    '${_monthLabels[month.month - 1]} ${month.year}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.slate900,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  '${d.day}',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: selected ? Colors.white : AppColors.slate900,
-                  ),
+                IconButton(
+                  onPressed: () => setState(() {
+                    _visibleMonth = DateTime(month.year, month.month + 1);
+                  }),
+                  icon: const Icon(Icons.chevron_right, size: 22),
+                  color: AppColors.slate600,
+                  visualDensity: VisualDensity.compact,
+                  tooltip: 'Next month',
                 ),
               ],
             ),
           ),
-        );
-      }).toList(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Row(
+              children: _weekdayLabels
+                  .map(
+                    (d) => Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        child: Text(
+                          d,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.slate400,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+          const Divider(height: 1, thickness: 1, color: AppColors.slate100),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4, 4, 4, 8),
+            child: GridView.count(
+              crossAxisCount: 7,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.zero,
+              children: [
+                for (int i = 0; i < leadingBlanks; i++) const SizedBox.shrink(),
+                for (int day = 1; day <= daysInMonth; day++)
+                  _buildDayCell(
+                    date: DateTime(month.year, month.month, day),
+                    today: today,
+                    selectedDate: _selectedDate,
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDayCell({
+    required DateTime date,
+    required DateTime today,
+    required DateTime? selectedDate,
+  }) {
+    final isToday = dateKey(date) == dateKey(today);
+    final isSelected = selectedDate != null && dateKey(date) == dateKey(selectedDate);
+    final isPast = date.isBefore(today);
+    final enabled = !isPast;
+
+    return GestureDetector(
+      onTap: enabled
+          ? () async {
+              setState(() => _selectedDate = date);
+              await _checkAvailability();
+            }
+          : null,
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: Container(
+          margin: const EdgeInsets.all(2),
+          decoration: BoxDecoration(
+            shape: (isSelected || isToday)
+                ? BoxShape.circle
+                : BoxShape.rectangle,
+            color: isSelected
+                ? AppColors.slate900
+                : isToday
+                    ? AppColors.teal50
+                    : null,
+            border: isToday && !isSelected
+                ? Border.all(color: AppColors.teal600, width: 1.5)
+                : null,
+          ),
+          alignment: Alignment.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '${date.day}',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: isSelected
+                      ? Colors.white
+                      : isToday
+                          ? AppColors.teal600
+                          : enabled
+                              ? AppColors.slate900
+                              : AppColors.slate300,
+                ),
+              ),
+              if (isToday && !isSelected)
+                Container(
+                  width: 4,
+                  height: 4,
+                  margin: const EdgeInsets.only(top: 2),
+                  decoration: const BoxDecoration(
+                    color: AppColors.teal600,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
