@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../app/theme.dart';
 import '../../../core/services/booking_service.dart';
 import '../../../shared/models/booking_model.dart';
@@ -47,14 +48,14 @@ class _DashboardViewState extends State<DashboardView> {
     final list = _tab == _Tab.all
         ? _bookings
         : _bookings.where((b) => b.type == _tab.type).toList();
-    list.sort((a, b) => '${b.date}${b.endTime}'
-        .compareTo('${a.date}${a.endTime}'));
+    list.sort(
+      (a, b) => '${b.date}${b.endTime}'.compareTo('${a.date}${a.endTime}'),
+    );
     return list;
   }
 
-  int get _todayCount => _bookings
-      .where((b) => dateKey(b.date) == todayLocalStr())
-      .length;
+  int get _todayCount =>
+      _bookings.where((b) => dateKey(b.date) == todayLocalStr()).length;
 
   int get _upcomingApptCount => _bookings
       .where((b) => b.isUpcoming && b.type == BookingType.appointment)
@@ -64,8 +65,7 @@ class _DashboardViewState extends State<DashboardView> {
       .where((b) => b.isUpcoming && b.type == BookingType.parking)
       .length;
 
-  int get _confirmedCount =>
-      _bookings.where((b) => b.isConfirmed).length;
+  int get _confirmedCount => _bookings.where((b) => b.isConfirmed).length;
 
   String get _greeting => greeting();
 
@@ -76,8 +76,8 @@ class _DashboardViewState extends State<DashboardView> {
       child: _loading
           ? const Spinner(label: 'Loading bookings…')
           : _error != null
-              ? ErrorState(message: _error!, onRetry: _load)
-              : _buildContent(),
+          ? ErrorState(message: _error!, onRetry: _load)
+          : _buildContent(),
     );
   }
 
@@ -102,7 +102,7 @@ class _DashboardViewState extends State<DashboardView> {
           physics: const NeverScrollableScrollPhysics(),
           mainAxisSpacing: 12,
           crossAxisSpacing: 12,
-          childAspectRatio: 1.4,
+          childAspectRatio: 1.3,
           children: [
             MetricCard(
               label: "TODAY'S",
@@ -173,9 +173,7 @@ class _DashboardViewState extends State<DashboardView> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withAlpha(8), blurRadius: 4),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withAlpha(8), blurRadius: 4)],
       ),
       child: Row(
         children: [
@@ -286,10 +284,7 @@ class _DashboardViewState extends State<DashboardView> {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 13,
-              color: AppColors.slate500,
-            ),
+            style: const TextStyle(fontSize: 13, color: AppColors.slate500),
           ),
           Flexible(
             child: Text(
@@ -309,16 +304,12 @@ class _DashboardViewState extends State<DashboardView> {
   }
 }
 
-enum _Tab {
-  all,
-  appointment,
-  parking,
-}
+enum _Tab { all, appointment, parking }
 
 extension _TabExt on _Tab {
   BookingType? get type => switch (this) {
-        _Tab.all => null,
-        _Tab.appointment => BookingType.appointment,
-        _Tab.parking => BookingType.parking,
-      };
+    _Tab.all => null,
+    _Tab.appointment => BookingType.appointment,
+    _Tab.parking => BookingType.parking,
+  };
 }
