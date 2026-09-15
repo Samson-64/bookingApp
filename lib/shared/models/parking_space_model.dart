@@ -12,10 +12,12 @@ class ParkingSpace {
   });
 
   factory ParkingSpace.fromMap(Map<String, dynamic> map) {
+    final rawAvailable = map['available'];
     return ParkingSpace(
       id: map['id'].toString(),
       name: map['name']?.toString() ?? '',
       location: map['location']?.toString() ?? '',
+      isAvailable: rawAvailable != null ? rawAvailable == true : true,
     );
   }
 
