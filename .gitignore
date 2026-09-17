@@ -39,6 +39,13 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
+# Config / secrets — never commit these
+config.json
+*.env
+.env.*
+android/local.properties
+android/key.properties
+
 # Android Studio will place build artifacts here
 /android/app/debug
 /android/app/profile
