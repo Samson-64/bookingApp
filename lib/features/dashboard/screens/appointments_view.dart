@@ -10,7 +10,9 @@ import '../../../shared/widgets/error_state.dart';
 import '../../../shared/widgets/spinner.dart';
 
 class AppointmentsView extends StatefulWidget {
-  const AppointmentsView({super.key});
+  final String? excludePersonId;
+
+  const AppointmentsView({super.key, this.excludePersonId});
 
   @override
   State<AppointmentsView> createState() => _AppointmentsViewState();
@@ -67,6 +69,10 @@ class _AppointmentsViewState extends State<AppointmentsView> {
     });
     try {
       _people = await BookingService.instance.fetchProviders();
+      if (widget.excludePersonId != null) {
+        _people =
+            _people.where((p) => p.id != widget.excludePersonId).toList();
+      }
       if (_people.isNotEmpty) _selectedPerson = _people.first;
     } catch (e) {
       _error = e.toString();
