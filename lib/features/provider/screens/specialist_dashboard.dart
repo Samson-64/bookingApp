@@ -45,8 +45,9 @@ class _ProviderDashboardViewState extends State<ProviderDashboardView> {
       _error = null;
     });
     try {
-      _bookings = await BookingService.instance
-          .fetchSpecialistBookings(widget.user.personId ?? '');
+      _bookings = await BookingService.instance.fetchSpecialistBookings(
+        widget.user.personId ?? '',
+      );
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());
     }
@@ -74,27 +75,32 @@ class _ProviderDashboardViewState extends State<ProviderDashboardView> {
       );
       if (mounted) {
         setState(() {
-          _bookings = _bookings.map((b) => b.id == booking.id
-              ? Booking.fromMap({
-                  'id': b.id,
-                  'userId': b.userId,
-                  'type': b.type == BookingType.parking ? 'PARKING' : 'APPOINTMENT',
-                  'status': status,
-                  'date': dateKey(b.date),
-                  'startTime': b.startTime,
-                  'endTime': b.endTime,
-                  'reference': b.reference,
-                  'person': b.person?.toMap(),
-                })
-              : b)
-          .toList();
+          _bookings = _bookings
+              .map(
+                (b) => b.id == booking.id
+                    ? Booking.fromMap({
+                        'id': b.id,
+                        'userId': b.userId,
+                        'type': b.type == BookingType.parking
+                            ? 'PARKING'
+                            : 'APPOINTMENT',
+                        'status': status,
+                        'date': dateKey(b.date),
+                        'startTime': b.startTime,
+                        'endTime': b.endTime,
+                        'reference': b.reference,
+                        'person': b.person?.toMap(),
+                      })
+                    : b,
+              )
+              .toList();
         });
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
       }
     }
     if (mounted) setState(() => _busyId = null);
@@ -176,7 +182,7 @@ class _ProviderDashboardViewState extends State<ProviderDashboardView> {
               const SizedBox(width: 12),
               Expanded(
                 child: MetricCard(
-                  label: 'UPCOMING CONFIRMED',
+                  label: 'UPCOMING \nCONFIRMED',
                   value: '$_upcomingConfirmed',
                   icon: Icons.calendar_month_outlined,
                 ),
@@ -272,9 +278,7 @@ class _ProviderDashboardViewState extends State<ProviderDashboardView> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withAlpha(8), blurRadius: 6),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withAlpha(8), blurRadius: 6)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -337,8 +341,11 @@ class _ProviderDashboardViewState extends State<ProviderDashboardView> {
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        const Icon(Icons.person,
-                            size: 14, color: AppColors.slate400),
+                        const Icon(
+                          Icons.person,
+                          size: 14,
+                          color: AppColors.slate400,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           'Client: ${b.clientName ?? 'N/A'}',
@@ -354,8 +361,11 @@ class _ProviderDashboardViewState extends State<ProviderDashboardView> {
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          const Icon(Icons.mail_outline,
-                              size: 14, color: AppColors.slate400),
+                          const Icon(
+                            Icons.mail_outline,
+                            size: 14,
+                            color: AppColors.slate400,
+                          ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
@@ -373,8 +383,11 @@ class _ProviderDashboardViewState extends State<ProviderDashboardView> {
                     const SizedBox(height: 2),
                     Row(
                       children: [
-                        const Icon(Icons.schedule,
-                            size: 14, color: AppColors.slate400),
+                        const Icon(
+                          Icons.schedule,
+                          size: 14,
+                          color: AppColors.slate400,
+                        ),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
@@ -404,10 +417,7 @@ class _ProviderDashboardViewState extends State<ProviderDashboardView> {
             ],
           ),
           const SizedBox(height: 12),
-          Divider(
-            height: 1,
-            color: Colors.grey.withAlpha(30),
-          ),
+          Divider(height: 1, color: Colors.grey.withAlpha(30)),
           const SizedBox(height: 12),
           if (b.status == BookingStatus.pending)
             _actionRow(
