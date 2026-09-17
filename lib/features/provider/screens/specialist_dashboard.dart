@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/theme.dart';
-import '../../../core/services/auth_service.dart';
 import '../../../core/services/booking_service.dart';
 import '../../../shared/models/booking_model.dart';
 import '../../../shared/models/user_model.dart';
@@ -12,19 +11,17 @@ import '../../../shared/widgets/metric_card.dart';
 import '../../../shared/widgets/spinner.dart';
 import '../../../shared/widgets/status_badge.dart';
 
-class SpecialistDashboard extends StatefulWidget {
-  static const String routeName = '/provider';
+class ProviderDashboardView extends StatefulWidget {
+  final AppUser user;
 
-  const SpecialistDashboard({super.key});
+  const ProviderDashboardView({super.key, required this.user});
 
   @override
-  State<SpecialistDashboard> createState() => _SpecialistDashboardState();
+  State<ProviderDashboardView> createState() => _ProviderDashboardViewState();
 }
 
-class _SpecialistDashboardState extends State<SpecialistDashboard> {
-  AppUser? _profile;
+class _ProviderDashboardViewState extends State<ProviderDashboardView> {
   List<Booking> _bookings = [];
-  bool _loadingProfile = true;
   bool _loading = true;
   String? _error;
   String _tab = 'ALL';
@@ -41,32 +38,7 @@ class _SpecialistDashboardState extends State<SpecialistDashboard> {
   @override
   void initState() {
     super.initState();
-    _load();
-  }
-
-  Future<void> _load() async {
-    setState(() {
-      _loadingProfile = true;
-      _error = null;
-    });
-    try {
-      final profile = await AuthService.instance.fetchProfile();
-      if (!mounted) return;
-      if (profile == null || !profile.isSpecialist) {
-        Navigator.of(context).pushReplacementNamed('/home');
-        return;
-      }
-      _profile = profile;
-      setState(() => _loadingProfile = false);
-      await _loadBookings();
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _loadingProfile = false;
-          _error = e.toString();
-        });
-      }
-    }
+    _loadBookings();
   }
 
   Future<void> _loadBookings() async {
@@ -76,7 +48,7 @@ class _SpecialistDashboardState extends State<SpecialistDashboard> {
     });
     try {
       _bookings = await BookingService.instance
-          .fetchSpecialistBookings(_profile?.personId ?? '');
+          .fetchSpecialistBookings(widget.user.personId ?? '');
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());
     }
@@ -130,40 +102,11 @@ class _SpecialistDashboardState extends State<SpecialistDashboard> {
     if (mounted) setState(() => _busyId = null);
   }
 
-  Future<void> _signOut() async {
-    await AuthService.instance.signOut();
-    if (!mounted) return;
-    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final profile = _profile;
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Provider Dashboard'),
-        actions: [
-          IconButton(
-            tooltip: 'Sign out',
-            icon: const Icon(Icons.logout_rounded),
-            onPressed: _signOut,
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: _buildBody(profile),
-    );
-  }
-
-  Widget _buildBody(AppUser? profile) {
-    if (_loadingProfile) {
-      return const Spinner(label: 'Loading profile…');
-    }
+    final user = widget.user;
     if (_error != null && _bookings.isEmpty) {
-      return ErrorState(message: _error!, onRetry: _load);
-    }
-    if (profile == null) {
-      return const Spinner(label: 'Loading profile…');
+      return ErrorState(message: _error!, onRetry: _loadBookings);
     }
 
     return RefreshIndicator(
@@ -184,9 +127,7 @@ class _SpecialistDashboardState extends State<SpecialistDashboard> {
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  profile.name.isNotEmpty
-                      ? profile.name[0].toUpperCase()
-                      : '?',
+                  user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -209,7 +150,7 @@ class _SpecialistDashboardState extends State<SpecialistDashboard> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Welcome back, ${profile.name}',
+                      'Welcome back, ${user.name}',
                       style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.slate500,
@@ -274,9 +215,6 @@ class _SpecialistDashboardState extends State<SpecialistDashboard> {
             )
           else
             ..._filtered.map((b) => _appointmentCard(b)),
-
-          const SizedBox(height: 16),
-          _buildQuickLinks(),
         ],
       ),
     );
@@ -582,55 +520,6 @@ class _SpecialistDashboardState extends State<SpecialistDashboard> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildQuickLinks() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.slate50,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.slate200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Also book your own slots',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: AppColors.slate900,
-            ),
-          ),
-          const SizedBox(height: 2),
-          const Text(
-            'As a provider you can also schedule appointments and reserve parking like a client.',
-            style: TextStyle(fontSize: 12, color: AppColors.slate500),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () =>
-                      Navigator.of(context).pushNamed('/home'),
-                  child: const Text('Book Appointment'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () =>
-                      Navigator.of(context).pushNamed('/home'),
-                  child: const Text('Reserve Parking'),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 }
