@@ -5,7 +5,7 @@ import 'core/services/auth_service.dart';
 import 'core/storage/token_storage.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/dashboard/screens/home_shell.dart';
-import 'features/provider/screens/specialist_dashboard.dart';
+import 'features/provider/screens/specialist_shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,7 +26,7 @@ class BookingApp extends StatelessWidget {
       routes: {
         LoginScreen.routeName: (_) => const LoginScreen(),
         HomeShell.routeName: (_) => const HomeShell(),
-        SpecialistDashboard.routeName: (_) => const SpecialistDashboard(),
+        SpecialistShell.routeName: (_) => const SpecialistShell(),
       },
     );
   }
@@ -61,7 +61,7 @@ class _SplashScreenState extends State<SplashScreen> {
     try {
       final profile = await AuthService.instance.fetchProfile();
       if (profile?.isSpecialist ?? false) {
-        route = SpecialistDashboard.routeName;
+        route = SpecialistShell.routeName;
       }
     } catch (_) {
       // Fall back to the client shell; profile loads there.
