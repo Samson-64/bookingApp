@@ -29,8 +29,6 @@ class _ProviderDashboardViewState extends State<ProviderDashboardView> {
 
   static const _tabs = [
     ('ALL', 'All'),
-    ('PENDING', 'Pending'),
-    ('CONFIRMED', 'Confirmed'),
     ('COMPLETED', 'Completed'),
     ('CANCELLED', 'Cancelled'),
   ];
@@ -231,7 +229,6 @@ class _ProviderDashboardViewState extends State<ProviderDashboardView> {
         children: _tabs.map((t) {
           final (key, label) = t;
           final active = _tab == key;
-          final count = _count(key);
           return Expanded(
             child: GestureDetector(
               onTap: () => setState(() => _tab = key),
@@ -251,46 +248,13 @@ class _ProviderDashboardViewState extends State<ProviderDashboardView> {
                       : null,
                 ),
                 alignment: Alignment.center,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      label,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: active
-                            ? AppColors.slate900
-                            : AppColors.slate500,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 5,
-                        vertical: 1,
-                      ),
-                      decoration: BoxDecoration(
-                        color: active
-                            ? AppColors.teal50
-                            : AppColors.slate200,
-                        borderRadius: BorderRadius.circular(6),
-                        border: active
-                            ? Border.all(color: AppColors.teal200)
-                            : null,
-                      ),
-                      child: Text(
-                        '$count',
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                          color: active
-                              ? AppColors.teal700
-                              : AppColors.slate600,
-                        ),
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: active ? AppColors.slate900 : AppColors.slate500,
+                  ),
                 ),
               ),
             ),
