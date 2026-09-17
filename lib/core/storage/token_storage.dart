@@ -9,10 +9,14 @@ class TokenStorage {
 
   final _storage = const FlutterSecureStorage();
   static const String _tokenKey = 'pulsebook.token';
+  static const String _refreshKey = 'pulsebook.refresh';
   static const String _userKey = 'pulsebook.user';
 
-  Future<void> save({required String token, AppUser? user}) async {
+  Future<void> save({required String token, String? refreshToken, AppUser? user}) async {
     await _storage.write(key: _tokenKey, value: token);
+    if (refreshToken != null) {
+      await _storage.write(key: _refreshKey, value: refreshToken);
+    }
     if (user != null) {
       await _storage.write(key: _userKey, value: jsonEncode(user.toMap()));
     }
@@ -20,6 +24,10 @@ class TokenStorage {
 
   Future<String?> readToken() async {
     return _storage.read(key: _tokenKey);
+  }
+
+  Future<String?> readRefreshToken() async {
+    return _storage.read(key: _refreshKey);
   }
 
   Future<AppUser?> readUser() async {
