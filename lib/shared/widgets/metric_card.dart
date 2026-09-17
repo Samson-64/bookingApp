@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../app/theme.dart';
 
 class MetricCard extends StatelessWidget {
@@ -90,10 +91,7 @@ class MetricCard extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Text(
-                    footer!,
-                    style: TextStyle(fontSize: 11, color: subFg),
-                  ),
+                  Text(footer!, style: TextStyle(fontSize: 11, color: subFg)),
                   if (footerAction != null) ...[
                     const SizedBox(width: 4),
                     Text(
