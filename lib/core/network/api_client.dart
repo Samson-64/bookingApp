@@ -37,9 +37,35 @@ class ApiClient {
           } else if (detail is String) {
             message = detail;
           }
-          if (err.response?.statusCode == 401) {
-            await TokenStorage.instance.clear();
+
+          if (err.response?.statusCode == 401 && !(err.requestOptions.extra['retry'] == true)) {
+            final refreshToken = await TokenStorage.instance.readRefreshToken();
+            if (refreshToken != null) {
+              try {
+                final refreshResponse = await Dio().post(
+                  '${ApiConstants.baseUrl}/auth/refresh',
+                  data: {'refresh_token': refreshToken},
+                );
+                if (refreshResponse.statusCode == 200) {
+                  final data = refreshResponse.data;
+                  await TokenStorage.instance.save(
+                    token: data['access_token'],
+                    refreshToken: data['refresh_token'],
+                  );
+                  err.requestOptions.extra['retry'] = true;
+                  err.requestOptions.headers['Authorization'] = 'Bearer ${data['access_token']}';
+                  final retryResponse = await _dio.fetch(err.requestOptions);
+                  handler.resolve(retryResponse);
+                  return;
+                }
+              } catch (_) {
+                await TokenStorage.instance.clear();
+              }
+            } else {
+              await TokenStorage.instance.clear();
+            }
           }
+
           handler.next(
             DioException(
               requestOptions: err.requestOptions,
