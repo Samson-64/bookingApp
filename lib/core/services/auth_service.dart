@@ -51,7 +51,17 @@ class AuthService {
     );
   }
 
-  Future<void> signOut() => _storage.clear();
+  Future<void> signOut() async {
+    final refreshToken = await _storage.readRefreshToken();
+    if (refreshToken != null) {
+      try {
+        await _api.post('/api/auth/logout', data: {'refresh_token': refreshToken});
+      } catch (_) {
+        // Best-effort revocation; always clear local storage.
+      }
+    }
+    await _storage.clear();
+  }
 
   /// Returns the signed-in user profile. Prefers the locally cached profile
   /// and falls back to the backend when no cached copy exists.
@@ -82,7 +92,11 @@ class AuthService {
     final user = AppUser.fromMap(
       Map<String, dynamic>.from(data['user'] as Map? ?? const {}),
     );
-    await _storage.save(token: token, user: user);
+    await _storage.save(
+      token: token,
+      refreshToken: data['refresh_token']?.toString(),
+      user: user,
+    );
     return user;
   }
 }
