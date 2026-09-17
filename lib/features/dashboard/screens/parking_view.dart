@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../app/theme.dart';
 import '../../../core/services/parking_service.dart';
 import '../../../shared/models/parking_space_model.dart';
@@ -54,13 +55,13 @@ class _ParkingViewState extends State<ParkingView> {
       child: _loading
           ? const Spinner(label: 'Loading parking…')
           : _error != null
-              ? ErrorState(message: _error!, onRetry: _load)
-              : _spaces.isEmpty
-                  ? const EmptyState(
-                      title: 'No parking floors available',
-                      icon: Icons.local_parking_outlined,
-                    )
-                  : _buildContent(),
+          ? ErrorState(message: _error!, onRetry: _load)
+          : _spaces.isEmpty
+          ? const EmptyState(
+              title: 'No parking floors available',
+              icon: Icons.local_parking_outlined,
+            )
+          : _buildContent(),
     );
   }
 
@@ -115,7 +116,7 @@ class _ParkingViewState extends State<ParkingView> {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: AppColors.teal600,
+                color: AppColors.slate900,
                 borderRadius: BorderRadius.circular(12),
               ),
               alignment: Alignment.center,
@@ -151,7 +152,10 @@ class _ParkingViewState extends State<ParkingView> {
                   const SizedBox(height: 4),
                   Text(
                     '${spaces.length} Total Slot(s)',
-                    style: const TextStyle(fontSize: 12, color: AppColors.slate500),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.slate500,
+                    ),
                   ),
                 ],
               ),

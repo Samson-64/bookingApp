@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../app/theme.dart';
 import '../../../shared/models/parking_space_model.dart';
 import '../../../shared/utils/format.dart';
@@ -23,8 +24,7 @@ class _ParkingFloorViewState extends State<ParkingFloorView> {
   DateTime _date = DateTime.now();
   String? _error;
 
-  int get _availableCount =>
-      widget.spaces.where((s) => s.isAvailable).length;
+  int get _availableCount => widget.spaces.where((s) => s.isAvailable).length;
 
   Future<void> _changeDate(DateTime d) async {
     setState(() => _date = d);
@@ -44,15 +44,18 @@ class _ParkingFloorViewState extends State<ParkingFloorView> {
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.arrow_back_ios,
-                      size: 14, color: AppColors.teal600),
+                  Icon(
+                    Icons.arrow_back_ios,
+                    size: 14,
+                    color: AppColors.slate600,
+                  ),
                   SizedBox(width: 4),
                   Text(
                     'Back to Floors',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.teal600,
+                      color: AppColors.slate600,
                     ),
                   ),
                 ],
@@ -90,16 +93,16 @@ class _ParkingFloorViewState extends State<ParkingFloorView> {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.teal50,
+                    color: AppColors.slate50,
                     borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: AppColors.teal200),
+                    border: Border.all(color: AppColors.slate200),
                   ),
                   child: Text(
                     '$_availableCount Available',
                     style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.teal700,
+                      color: AppColors.slate700,
                     ),
                   ),
                 ),
@@ -121,7 +124,7 @@ class _ParkingFloorViewState extends State<ParkingFloorView> {
   Widget _buildDateSelector() {
     return Row(
       children: [
-        const Icon(Icons.calendar_today, size: 14, color: AppColors.teal600),
+        const Icon(Icons.calendar_today, size: 14, color: AppColors.slate600),
         const SizedBox(width: 8),
         const Text(
           'Date:',
@@ -144,8 +147,7 @@ class _ParkingFloorViewState extends State<ParkingFloorView> {
               if (picked != null) _changeDate(picked);
             },
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
                 color: AppColors.slate50,
                 borderRadius: BorderRadius.circular(10),
@@ -187,7 +189,7 @@ class _ParkingFloorViewState extends State<ParkingFloorView> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: isAvail ? AppColors.teal600 : AppColors.slate400,
+                  color: isAvail ? AppColors.slate600 : AppColors.slate400,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 alignment: Alignment.center,
@@ -222,10 +224,7 @@ class _ParkingFloorViewState extends State<ParkingFloorView> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 6,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                 decoration: BoxDecoration(
                   color: isAvail ? AppColors.emerald50 : AppColors.rose50,
                   borderRadius: BorderRadius.circular(6),
@@ -242,10 +241,7 @@ class _ParkingFloorViewState extends State<ParkingFloorView> {
             ],
           ),
           const SizedBox(height: 12),
-          Divider(
-            height: 1,
-            color: Colors.grey.withAlpha(30),
-          ),
+          Divider(height: 1, color: Colors.grey.withAlpha(30)),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,

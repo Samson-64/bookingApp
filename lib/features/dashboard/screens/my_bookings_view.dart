@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../app/theme.dart';
 import '../../../core/services/booking_service.dart';
 import '../../../shared/models/booking_model.dart';
@@ -58,18 +59,19 @@ class _MyBookingsViewState extends State<MyBookingsView> {
       list = list.where((b) => b.type == BookingType.parking).toList();
     }
 
-    list.sort((a, b) => '${b.date}${b.endTime}'
-        .compareTo('${a.date}${a.endTime}'));
+    list.sort(
+      (a, b) => '${b.date}${b.endTime}'.compareTo('${a.date}${a.endTime}'),
+    );
     return list;
   }
 
   int _count(_StatusTab tab) => _bookings.where((b) {
-        if (tab == _StatusTab.upcoming) return b.isUpcoming;
-        if (tab == _StatusTab.pending) return b.isPending;
-        if (tab == _StatusTab.completed) return b.isCompleted;
-        if (tab == _StatusTab.cancelled) return b.isCancelled;
-        return true;
-      }).length;
+    if (tab == _StatusTab.upcoming) return b.isUpcoming;
+    if (tab == _StatusTab.pending) return b.isPending;
+    if (tab == _StatusTab.completed) return b.isCompleted;
+    if (tab == _StatusTab.cancelled) return b.isCancelled;
+    return true;
+  }).length;
 
   @override
   Widget build(BuildContext context) {
@@ -78,8 +80,8 @@ class _MyBookingsViewState extends State<MyBookingsView> {
       child: _loading
           ? const Spinner(label: 'Loading bookings…')
           : _error != null
-              ? ErrorState(message: _error!, onRetry: _load)
-              : _buildContent(),
+          ? ErrorState(message: _error!, onRetry: _load)
+          : _buildContent(),
     );
   }
 
@@ -142,7 +144,7 @@ class _MyBookingsViewState extends State<MyBookingsView> {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
-                  color: active ? AppColors.teal600 : Colors.transparent,
+                  color: active ? AppColors.slate900 : Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 alignment: Alignment.center,
@@ -167,7 +169,7 @@ class _MyBookingsViewState extends State<MyBookingsView> {
                         decoration: BoxDecoration(
                           color: active
                               ? Colors.white.withAlpha(30)
-                              : AppColors.teal50,
+                              : AppColors.slate50,
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -175,9 +177,7 @@ class _MyBookingsViewState extends State<MyBookingsView> {
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.bold,
-                            color: active
-                                ? Colors.white
-                                : AppColors.teal600,
+                            color: active ? Colors.white : AppColors.slate900,
                           ),
                         ),
                       ),
@@ -203,10 +203,10 @@ class _MyBookingsViewState extends State<MyBookingsView> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
-                color: active ? AppColors.teal600 : Colors.white,
+                color: active ? AppColors.slate900 : Colors.white,
                 borderRadius: BorderRadius.circular(999),
                 border: Border.all(
-                  color: active ? AppColors.teal600 : AppColors.slate200,
+                  color: active ? AppColors.slate900 : AppColors.slate200,
                 ),
               ),
               child: Text(
@@ -270,7 +270,8 @@ class _MyBookingsViewState extends State<MyBookingsView> {
                   _row('Time', '${b.startTime} – ${b.endTime}'),
                   _row('Reference', b.reference),
                   if (b.person != null) _row('Provider', b.person!.name),
-                  if (b.space != null) _row('Space', '${b.space!.name} (${b.space!.location})'),
+                  if (b.space != null)
+                    _row('Space', '${b.space!.name} (${b.space!.location})'),
                   const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
@@ -294,7 +295,10 @@ class _MyBookingsViewState extends State<MyBookingsView> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontSize: 13, color: AppColors.slate500)),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 13, color: AppColors.slate500),
+          ),
           Flexible(
             child: Text(
               value,
