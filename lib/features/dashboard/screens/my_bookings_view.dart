@@ -205,9 +205,6 @@ class _MyBookingsViewState extends State<MyBookingsView> {
               decoration: BoxDecoration(
                 color: active ? AppColors.slate900 : Colors.white,
                 borderRadius: BorderRadius.circular(999),
-                border: Border.all(
-                  color: active ? AppColors.slate900 : AppColors.slate200,
-                ),
               ),
               child: Text(
                 f.label,

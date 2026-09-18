@@ -144,7 +144,7 @@ class BookingCard extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: isAppt ? AppColors.indigo50 : AppColors.teal50,
+                    color: isAppt ? AppColors.indigo50 : AppColors.slate50,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
@@ -154,7 +154,7 @@ class BookingCard extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                       color: isAppt
                           ? AppColors.indigo600
-                          : AppColors.teal600,
+                          : AppColors.slate600,
                     ),
                   ),
                 ),
@@ -196,7 +196,7 @@ class BookingCard extends StatelessWidget {
                         onPressed: onBookAgain,
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.slate700,
-                          side: const BorderSide(color: AppColors.slate200),
+                          side: BorderSide.none,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),

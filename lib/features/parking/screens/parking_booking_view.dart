@@ -114,14 +114,14 @@ class _ParkingBookingViewState extends State<ParkingBookingView> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(Icons.arrow_back_ios,
-                    size: 14, color: AppColors.teal600),
+                    size: 14, color: AppColors.slate600),
                 const SizedBox(width: 4),
                 Text(
                   'Back to ${widget.floor}',
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.teal600,
+                    color: AppColors.slate600,
                   ),
                 ),
               ],
@@ -134,7 +134,7 @@ class _ParkingBookingViewState extends State<ParkingBookingView> {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: AppColors.teal600,
+                  color: AppColors.slate600,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 alignment: Alignment.center,
@@ -233,7 +233,6 @@ class _ParkingBookingViewState extends State<ParkingBookingView> {
                     decoration: BoxDecoration(
                       color: AppColors.slate50,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.slate200),
                     ),
                     child: Row(
                       children: [
@@ -288,7 +287,7 @@ class _ParkingBookingViewState extends State<ParkingBookingView> {
                           : _checkAvailability,
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.slate700,
-                        side: const BorderSide(color: AppColors.slate200),
+                        side: BorderSide.none,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -428,7 +427,6 @@ class _ParkingBookingViewState extends State<ParkingBookingView> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.slate200),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -437,7 +435,7 @@ class _ParkingBookingViewState extends State<ParkingBookingView> {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: AppColors.teal600,
+                    color: AppColors.slate600,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   alignment: Alignment.center,
@@ -522,7 +520,6 @@ class _ParkingBookingViewState extends State<ParkingBookingView> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: AppColors.slate200),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(

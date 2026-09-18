@@ -372,19 +372,19 @@ class _AppointmentsViewState extends State<AppointmentsView> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.teal50,
+              color: AppColors.slate50,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
-                const Icon(Icons.schedule, size: 16, color: AppColors.teal600),
+                const Icon(Icons.schedule, size: 16, color: AppColors.slate600),
                 const SizedBox(width: 8),
                 Text(
                   'Working hours: ${_availability!.scheduleStart} – ${_availability!.scheduleEnd}',
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.teal700,
+                    color: AppColors.slate700,
                   ),
                 ),
               ],
@@ -440,9 +440,8 @@ class _AppointmentsViewState extends State<AppointmentsView> {
           width: double.infinity,
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: AppColors.teal50,
+            color: AppColors.slate50,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.teal200),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -451,7 +450,7 @@ class _AppointmentsViewState extends State<AppointmentsView> {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: AppColors.teal600,
+                  color: AppColors.slate600,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 alignment: Alignment.center,
@@ -579,10 +578,6 @@ class _AppointmentsViewState extends State<AppointmentsView> {
         decoration: BoxDecoration(
           color: selected ? AppColors.slate50 : Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: selected ? AppColors.slate900 : AppColors.slate200,
-            width: selected ? 1.5 : 1,
-          ),
         ),
         child: Row(
           children: [
@@ -677,7 +672,6 @@ class _AppointmentsViewState extends State<AppointmentsView> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.slate200),
       ),
       child: Column(
         children: [
@@ -798,9 +792,6 @@ class _AppointmentsViewState extends State<AppointmentsView> {
                 : isToday
                 ? AppColors.slate100
                 : null,
-            border: isToday && !isSelected
-                ? Border.all(color: AppColors.slate900, width: 1.5)
-                : null,
           ),
           alignment: Alignment.center,
           child: Column(
@@ -860,7 +851,6 @@ class _AppointmentsViewState extends State<AppointmentsView> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: AppColors.slate200),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(

@@ -15,7 +15,6 @@ class ErrorState extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.rose50,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.rose600.withAlpha(60)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,

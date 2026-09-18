@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 
 import '../constants/api_constants.dart';
 import '../errors/api_exception.dart';
@@ -7,11 +8,14 @@ import '../storage/token_storage.dart';
 
 class ApiClient {
   ApiClient._() {
+    debugPrint('ApiClient using base URL: ${ApiConstants.baseUrl}');
     _dio = Dio(
       BaseOptions(
         baseUrl: ApiConstants.baseUrl,
-        connectTimeout: const Duration(seconds: 15),
-        receiveTimeout: const Duration(seconds: 15),
+        // Generous timeouts: the Render free-tier backend sleeps after ~15
+        // minutes of inactivity and can take 30-60s to cold-start.
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 60),
         headers: {'Content-Type': 'application/json'},
       ),
     );
@@ -30,6 +34,10 @@ class ApiClient {
           handler.next(opts);
         },
         onError: (err, handler) async {
+          debugPrint(
+            'ApiClient error: ${err.requestOptions.method} '
+            '${err.requestOptions.uri} (${err.type})',
+          );
           final detail = err.response?.data;
           String? message;
           if (detail is Map) {
@@ -72,13 +80,41 @@ class ApiClient {
               response: err.response,
               type: err.type,
               error: ApiException(
-                message: message ?? 'Something went wrong. Please try again.',
+                message: message ?? _friendlyNetworkMessage(err),
                 statusCode: err.response?.statusCode,
               ),
             ),
           );
         },
       );
+
+  /// Human-readable fallback for network-level failures that carry no server
+  /// body (timeouts, refused connections, DNS failures).
+  String _friendlyNetworkMessage(DioException err) {
+    switch (err.type) {
+      case DioExceptionType.connectionTimeout:
+        return 'Connection timed out. Please check your connection and try again.';
+      case DioExceptionType.receiveTimeout:
+        return 'The server took too long to respond. Please try again.';
+      case DioExceptionType.transformTimeout:
+        return 'The server took too long to respond. Please try again.';
+      case DioExceptionType.sendTimeout:
+        return 'Could not send the request. Please try again.';
+      case DioExceptionType.connectionError:
+        return 'Cannot reach the server. Please check your connection and try again.';
+      case DioExceptionType.badCertificate:
+        return 'Secure connection to the server could not be verified.';
+      case DioExceptionType.cancel:
+        return 'Request was cancelled.';
+      case DioExceptionType.badResponse:
+        return 'The server returned an unexpected response. Please try again.';
+      case DioExceptionType.unknown:
+        if (err.response == null) {
+          return 'Cannot reach the server. Please check your connection and try again.';
+        }
+        return 'Something went wrong. Please try again.';
+    }
+  }
 
   /// Convenience wrapper: throws [ApiException] on failure.
   Future<Response<T>> get<T>(

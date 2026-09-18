@@ -95,7 +95,6 @@ class _ParkingFloorViewState extends State<ParkingFloorView> {
                   decoration: BoxDecoration(
                     color: AppColors.slate50,
                     borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: AppColors.slate200),
                   ),
                   child: Text(
                     '$_availableCount Available',
@@ -151,7 +150,6 @@ class _ParkingFloorViewState extends State<ParkingFloorView> {
               decoration: BoxDecoration(
                 color: AppColors.slate50,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.slate200),
               ),
               child: Text(
                 formatShortDate(dateKey(_date)),
@@ -176,9 +174,6 @@ class _ParkingFloorViewState extends State<ParkingFloorView> {
       decoration: BoxDecoration(
         color: isAvail ? Colors.white : AppColors.slate50,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isAvail ? AppColors.slate200 : AppColors.slate200,
-        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

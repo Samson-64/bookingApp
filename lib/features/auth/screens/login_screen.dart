@@ -362,7 +362,6 @@ class _LoginScreenState extends State<LoginScreen> {
       decoration: BoxDecoration(
         color: AppColors.rose50,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.rose600.withAlpha(80)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -507,10 +506,6 @@ class _AccountTypeCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: active ? Colors.white : Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: active ? AppColors.slate900 : AppColors.slate200,
-            width: active ? 1.5 : 1,
-          ),
         ),
         child: Row(
           children: [

@@ -290,13 +290,13 @@ class _ProviderDashboardViewState extends State<ProviderDashboardView> {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: AppColors.teal50,
+                  color: AppColors.slate50,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 alignment: Alignment.center,
                 child: const Icon(
                   Icons.group,
-                  color: AppColors.teal600,
+                  color: AppColors.slate600,
                   size: 22,
                 ),
               ),
@@ -483,7 +483,7 @@ class _ProviderDashboardViewState extends State<ProviderDashboardView> {
               onPressed: busy ? null : onSecondary,
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.rose600,
-                side: const BorderSide(color: Color(0xFFFDA4AF)),
+                side: BorderSide.none,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),

@@ -132,7 +132,6 @@ class _StaffAppointmentsViewState extends State<StaffAppointmentsView> {
               decoration: BoxDecoration(
                 color: AppColors.indigo50,
                 borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: AppColors.indigo600.withAlpha(80)),
               ),
               child: const Text(
                 'Staff Authorization Active',
@@ -220,12 +219,9 @@ class _StaffAppointmentsViewState extends State<StaffAppointmentsView> {
                       ),
                       decoration: BoxDecoration(
                         color: active
-                            ? AppColors.teal50
+                            ? AppColors.slate50
                             : AppColors.slate200,
                         borderRadius: BorderRadius.circular(6),
-                        border: active
-                            ? Border.all(color: AppColors.teal200)
-                            : null,
                       ),
                       child: Text(
                         '$count',
@@ -233,7 +229,7 @@ class _StaffAppointmentsViewState extends State<StaffAppointmentsView> {
                           fontSize: 9,
                           fontWeight: FontWeight.bold,
                           color: active
-                              ? AppColors.teal700
+                              ? AppColors.slate700
                               : AppColors.slate600,
                         ),
                       ),
@@ -270,13 +266,13 @@ class _StaffAppointmentsViewState extends State<StaffAppointmentsView> {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: AppColors.teal50,
+                  color: AppColors.slate50,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 alignment: Alignment.center,
                 child: const Icon(
                   Icons.group,
-                  color: AppColors.teal600,
+                  color: AppColors.slate600,
                   size: 22,
                 ),
               ),
@@ -472,7 +468,7 @@ class _StaffAppointmentsViewState extends State<StaffAppointmentsView> {
               onPressed: busy ? null : onDanger,
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.rose600,
-                side: const BorderSide(color: Color(0xFFFDA4AF)),
+                side: BorderSide.none,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
