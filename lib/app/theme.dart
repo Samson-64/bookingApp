@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Brand palette: teal primary, indigo accent, slate/navy dark tones,
+/// Brand palette: slate primary, indigo accent, slate/navy dark tones,
 /// light gray background.
 abstract final class AppColors {
   static const Color slate900 = Color(0xFF0F172A);
@@ -13,11 +13,6 @@ abstract final class AppColors {
   static const Color slate200 = Color(0xFFE2E8F0);
   static const Color slate100 = Color(0xFFF1F5F9);
   static const Color slate50 = Color(0xFFF8FAFC);
-
-  static const Color teal600 = Color(0xFF0D9488);
-  static const Color teal700 = Color(0xFF0F766E);
-  static const Color teal50 = Color(0xFFF0FDFA);
-  static const Color teal200 = Color(0xFF99F6E4);
 
   static const Color indigo600 = Color(0xFF4F46E5);
   static const Color indigo50 = Color(0xFFEEF2FF);
@@ -43,8 +38,8 @@ class AppTheme {
     final base = ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.teal600,
-        primary: AppColors.teal600,
+        seedColor: AppColors.slate600,
+        primary: AppColors.slate600,
         secondary: AppColors.indigo600,
         surface: Colors.white,
       ),
@@ -89,14 +84,14 @@ class AppTheme {
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: Colors.white,
-        selectedItemColor: AppColors.teal700,
+        selectedItemColor: AppColors.slate700,
         unselectedItemColor: AppColors.slate400,
         type: BottomNavigationBarType.fixed,
         elevation: 8,
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: Colors.white,
-        indicatorColor: AppColors.teal50,
+        indicatorColor: AppColors.slate50,
         surfaceTintColor: Colors.transparent,
         elevation: 8,
         height: 68,
@@ -112,7 +107,7 @@ class AppTheme {
         iconTheme: WidgetStateProperty.resolveWith(
           (states) => IconThemeData(
             color: states.contains(WidgetState.selected)
-                ? AppColors.teal700
+                ? AppColors.slate700
                 : AppColors.slate400,
             size: 22,
           ),
@@ -156,19 +151,19 @@ class AppTheme {
         labelStyle: const TextStyle(color: AppColors.slate500, fontSize: 13),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.slate200),
+          borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.slate200),
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.slate900, width: 1.5),
+          borderSide: BorderSide.none,
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.rose600),
+          borderSide: BorderSide.none,
         ),
       ),
       dividerTheme: const DividerThemeData(
