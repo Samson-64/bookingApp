@@ -240,7 +240,7 @@ class _ParkingFloorViewState extends State<ParkingFloorView> {
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
-            height: 40,
+            height: 55,
             child: ElevatedButton(
               onPressed: isAvail
                   ? () {
