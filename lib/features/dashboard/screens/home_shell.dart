@@ -142,7 +142,10 @@ class _HomeShellState extends State<HomeShell> {
     return IndexedStack(
       index: _index,
       children: [
-        DashboardView(user: profile),
+        DashboardView(
+          user: profile,
+          onNavigateToTab: (i) => setState(() => _index = i),
+        ),
         const AppointmentsView(),
         const ParkingView(),
         MyBookingsView(user: profile),
