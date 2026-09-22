@@ -13,7 +13,8 @@ import '../../../shared/widgets/spinner.dart';
 
 class DashboardView extends StatefulWidget {
   final AppUser user;
-  const DashboardView({super.key, required this.user});
+  final ValueChanged<int>? onNavigateToTab;
+  const DashboardView({super.key, required this.user, this.onNavigateToTab});
 
   @override
   State<DashboardView> createState() => _DashboardViewState();
@@ -111,6 +112,7 @@ class _DashboardViewState extends State<DashboardView> {
               hero: true,
               footer: '${_bookings.where((b) => b.isUpcoming).length} upcoming',
               footerAction: 'View ›',
+              onTap: () => _goToTab(3),
             ),
             MetricCard(
               label: 'APPOINTMENTS',
@@ -120,6 +122,7 @@ class _DashboardViewState extends State<DashboardView> {
               iconFg: AppColors.emerald600,
               footer: 'Scheduled',
               footerAction: 'Book →',
+              onTap: () => _goToTab(1),
             ),
             MetricCard(
               label: 'PARKING',
@@ -127,6 +130,7 @@ class _DashboardViewState extends State<DashboardView> {
               icon: Icons.local_parking,
               footer: 'Multi-floor',
               footerAction: 'Browse →',
+              onTap: () => _goToTab(2),
             ),
             MetricCard(
               label: 'CONFIRMED',
@@ -134,6 +138,7 @@ class _DashboardViewState extends State<DashboardView> {
               icon: Icons.check_circle_outline,
               footer: 'All-time',
               footerAction: 'History →',
+              onTap: () => _goToTab(3),
             ),
           ],
         ),
@@ -147,7 +152,7 @@ class _DashboardViewState extends State<DashboardView> {
             title: 'No bookings found',
             message: 'Your upcoming and past bookings will appear here.',
             action: ElevatedButton.icon(
-              onPressed: () {},
+              onPressed: _showBookNowChoices,
               icon: const Icon(Icons.add, size: 16),
               label: const Text('Book Now'),
             ),
@@ -159,11 +164,72 @@ class _DashboardViewState extends State<DashboardView> {
               child: BookingCard(
                 booking: b,
                 onViewDetails: () => _showDetail(b),
-                onBookAgain: () {},
+                onBookAgain: () => _goToTab(
+                  b.type == BookingType.appointment ? 1 : 2,
+                ),
               ),
             ),
           ),
       ],
+    );
+  }
+
+  void _goToTab(int index) => widget.onNavigateToTab?.call(index);
+
+  void _showBookNowChoices() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) => Container(
+        padding: const EdgeInsets.only(top: 12, bottom: 24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.slate200,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ListTile(
+              leading: const Icon(Icons.event_available,
+                  color: AppColors.indigo600),
+              title: const Text(
+                'Book Appointment',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              subtitle: const Text('Choose a provider, date and time'),
+              trailing: const Icon(Icons.chevron_right, size: 20),
+              onTap: () {
+                Navigator.pop(sheetCtx);
+                _goToTab(1);
+              },
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading:
+                  const Icon(Icons.local_parking, color: AppColors.slate900),
+              title: const Text(
+                'Book Parking',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              subtitle: const Text('Reserve a parking bay on any floor'),
+              trailing: const Icon(Icons.chevron_right, size: 20),
+              onTap: () {
+                Navigator.pop(sheetCtx);
+                _goToTab(2);
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
