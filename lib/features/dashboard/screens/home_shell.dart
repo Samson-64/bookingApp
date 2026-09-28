@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/realtime_service.dart';
 import '../../../shared/models/user_model.dart';
 import '../../../shared/widgets/spinner.dart';
 import '../../../features/staff/screens/staff_appointments_view.dart';
@@ -28,7 +29,14 @@ class _HomeShellState extends State<HomeShell> {
   @override
   void initState() {
     super.initState();
+    RealtimeService.instance.start();
     _loadProfile();
+  }
+
+  @override
+  void dispose() {
+    RealtimeService.instance.stop();
+    super.dispose();
   }
 
   Future<void> _loadProfile() async {
@@ -54,6 +62,7 @@ class _HomeShellState extends State<HomeShell> {
   }
 
   Future<void> _signOut() async {
+    await RealtimeService.instance.stop();
     await AuthService.instance.signOut();
     if (!mounted) return;
     Navigator.of(context).pushNamedAndRemoveUntil(
