@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../app/theme.dart';
+import '../../../core/services/booking_hub.dart';
 import '../../../core/services/booking_service.dart';
 import '../../../core/services/parking_service.dart';
 import '../../../shared/models/availability_model.dart';
@@ -94,6 +95,7 @@ class _ParkingBookingViewState extends State<ParkingBookingView> {
         endTime: _endTime!,
       );
       if (mounted) setState(() => _result = booking);
+      BookingHub.instance.invalidate();
     } catch (e) {
       setState(() => _error = e.toString());
     }
