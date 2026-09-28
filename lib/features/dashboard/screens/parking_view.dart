@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/theme.dart';
+import '../../../core/services/booking_hub.dart';
 import '../../../core/services/parking_service.dart';
 import '../../../shared/models/parking_space_model.dart';
 import '../../../shared/widgets/empty_state.dart';
@@ -23,7 +24,31 @@ class _ParkingViewState extends State<ParkingView> {
   @override
   void initState() {
     super.initState();
+    BookingHub.instance.addListener(_onBookingChanged);
     _load();
+  }
+
+  @override
+  void dispose() {
+    BookingHub.instance.removeListener(_onBookingChanged);
+    super.dispose();
+  }
+
+  void _onBookingChanged() => _reload();
+
+  /// Soft refresh: re-fetches parking spaces in place without a spinner flash.
+  Future<void> _reload() async {
+    try {
+      final spaces = await ParkingService.instance.fetchSpaces();
+      if (!mounted) return;
+      setState(() {
+        _spaces = spaces;
+        _error = null;
+        _loading = false;
+      });
+    } catch (e) {
+      if (mounted && _spaces.isEmpty) setState(() => _error = e.toString());
+    }
   }
 
   Future<void> _load() async {
