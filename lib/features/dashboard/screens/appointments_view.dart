@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/theme.dart';
+import '../../../core/services/booking_hub.dart';
 import '../../../core/services/booking_service.dart';
 import '../../../shared/models/availability_model.dart';
 import '../../../shared/models/person_model.dart';
@@ -145,6 +146,7 @@ class _AppointmentsViewState extends State<AppointmentsView> {
           );
         });
       }
+      BookingHub.instance.invalidate();
     } catch (e) {
       setState(() => _submitError = e.toString());
       if (mounted) {
