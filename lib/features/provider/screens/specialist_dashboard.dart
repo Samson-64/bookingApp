@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/theme.dart';
+import '../../../core/services/booking_hub.dart';
 import '../../../core/services/booking_service.dart';
 import '../../../shared/models/booking_model.dart';
 import '../../../shared/models/user_model.dart';
@@ -36,7 +37,33 @@ class _ProviderDashboardViewState extends State<ProviderDashboardView> {
   @override
   void initState() {
     super.initState();
+    BookingHub.instance.addListener(_onBookingChanged);
     _loadBookings();
+  }
+
+  @override
+  void dispose() {
+    BookingHub.instance.removeListener(_onBookingChanged);
+    super.dispose();
+  }
+
+  void _onBookingChanged() => _reload();
+
+  /// Soft refresh: updates the appointments in place without a spinner flash.
+  Future<void> _reload() async {
+    try {
+      final bookings = await BookingService.instance.fetchSpecialistBookings(
+        widget.user.personId ?? '',
+      );
+      if (!mounted) return;
+      setState(() {
+        _bookings = bookings;
+        _error = null;
+        _loading = false;
+      });
+    } catch (e) {
+      if (mounted && _bookings.isEmpty) setState(() => _error = e.toString());
+    }
   }
 
   Future<void> _loadBookings() async {
@@ -73,6 +100,7 @@ class _ProviderDashboardViewState extends State<ProviderDashboardView> {
         bookingId: booking.id,
         status: status,
       );
+      BookingHub.instance.invalidate();
       if (mounted) {
         setState(() {
           _bookings = _bookings
