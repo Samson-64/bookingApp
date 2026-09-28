@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/theme.dart';
+import '../../../core/services/booking_hub.dart';
 import '../../../core/services/booking_service.dart';
 import '../../../shared/models/booking_model.dart';
 import '../../../shared/models/user_model.dart';
@@ -29,7 +30,31 @@ class _DashboardViewState extends State<DashboardView> {
   @override
   void initState() {
     super.initState();
+    BookingHub.instance.addListener(_onBookingChanged);
     _load();
+  }
+
+  @override
+  void dispose() {
+    BookingHub.instance.removeListener(_onBookingChanged);
+    super.dispose();
+  }
+
+  void _onBookingChanged() => _reload();
+
+  /// Soft refresh: updates the list in place without flashing the spinner.
+  Future<void> _reload() async {
+    try {
+      final bookings = await BookingService.instance.fetchMyBookings();
+      if (!mounted) return;
+      setState(() {
+        _bookings = bookings;
+        _error = null;
+        _loading = false;
+      });
+    } catch (e) {
+      if (mounted && _bookings.isEmpty) setState(() => _error = e.toString());
+    }
   }
 
   Future<void> _load() async {
