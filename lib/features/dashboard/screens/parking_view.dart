@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../app/theme.dart';
 import '../../../core/services/booking_hub.dart';
 import '../../../core/services/parking_service.dart';
+import '../../../core/services/settings_controller.dart';
 import '../../../shared/models/parking_space_model.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_state.dart';
@@ -110,12 +111,26 @@ class _ParkingViewState extends State<ParkingView> {
           style: TextStyle(fontSize: 13, color: AppColors.slate500),
         ),
         const SizedBox(height: 16),
-        ...floors.map((floor) => _floorCard(floor, grouped[floor]!)),
+        // Listens to the settings cache so the preferred-floor badge appears as
+        // soon as the preferences load, not only on the next rebuild.
+        AnimatedBuilder(
+          animation: SettingsController.instance,
+          builder: (context, _) => Column(
+            children: [
+              for (final floor in floors) _floorCard(floor, grouped[floor]!),
+            ],
+          ),
+        ),
       ],
     );
   }
 
   Widget _floorCard(String floor, List<ParkingSpace> spaces) {
+    // The floor saved in Settings is badged rather than silently reordered, so
+    // the list still reads in the venue's own order.
+    final preferred = SettingsController.instance.preferredParkingFloor;
+    final isPreferred =
+        preferred != null && preferred.toLowerCase() == floor.toLowerCase();
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -131,6 +146,11 @@ class _ParkingViewState extends State<ParkingView> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isPreferred
+                ? AppColors.indigo600.withValues(alpha: 0.35)
+                : Colors.transparent,
+          ),
           boxShadow: [
             BoxShadow(color: Colors.black.withAlpha(8), blurRadius: 6),
           ],
