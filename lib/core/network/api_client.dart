@@ -51,7 +51,7 @@ class ApiClient {
             if (refreshToken != null) {
               try {
                 final refreshResponse = await Dio().post(
-                  '${ApiConstants.baseUrl}/auth/refresh',
+                  '${ApiConstants.baseUrl}/api/auth/refresh',
                   data: {'refresh_token': refreshToken},
                 );
                 if (refreshResponse.statusCode == 200) {
@@ -128,6 +128,9 @@ class ApiClient {
 
   Future<Response<T>> patch<T>(String path, {dynamic data}) =>
       _dio.patch<T>(path, data: data).catchError(_handle);
+
+  Future<Response<T>> delete<T>(String path) =>
+      _dio.delete<T>(path).catchError(_handle);
 
   Never _handle(Object e) {
     if (e is DioException && e.error is ApiException) {
