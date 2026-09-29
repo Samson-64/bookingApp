@@ -3,12 +3,19 @@ import 'package:flutter/material.dart';
 import '../../../app/theme.dart';
 import '../../../core/services/booking_hub.dart';
 import '../../../core/services/booking_service.dart';
+import '../../../core/services/settings_controller.dart';
 import '../../../shared/models/availability_model.dart';
 import '../../../shared/models/person_model.dart';
 import '../../../shared/utils/format.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_state.dart';
 import '../../../shared/widgets/spinner.dart';
+
+int _minutesFromTime(String time) {
+  final parts = time.split(':');
+  if (parts.length < 2) return 0;
+  return (int.tryParse(parts[0]) ?? 0) * 60 + (int.tryParse(parts[1]) ?? 0);
+}
 
 class AppointmentsView extends StatefulWidget {
   final String? excludePersonId;
@@ -116,6 +123,39 @@ class _AppointmentsViewState extends State<AppointmentsView> {
     if (_startTime == null) return _timeOptions.sublist(1);
     final idx = _timeOptions.indexOf(_startTime!);
     return _timeOptions.sublist(idx + 1);
+  }
+
+  /// Choosing a start also pre-selects the end, so the duration saved in
+  /// Settings applies without touching a second dropdown. A duration that falls
+  /// between slots snaps up to the next one, and one that overruns the day
+  /// leaves the end unset.
+  void _selectStart(String? value) {
+    final duration = SettingsController.instance.defaultDurationMinutes;
+    final start = value;
+    if (start == null) {
+      setState(() {
+        _startTime = null;
+        _endTime = null;
+      });
+      return;
+    }
+    final startIndex = _timeOptions.indexOf(start);
+    if (startIndex < 0) {
+      setState(() {
+        _startTime = start;
+        _endTime = null;
+      });
+      return;
+    }
+    final desired = _minutesFromTime(start) + duration;
+    final target = _timeOptions.indexWhere(
+      (t) => _minutesFromTime(t) >= desired,
+      startIndex + 1,
+    );
+    setState(() {
+      _startTime = start;
+      _endTime = target == -1 ? null : _timeOptions[target];
+    });
   }
 
   Future<void> _confirm() async {
@@ -400,10 +440,7 @@ class _AppointmentsViewState extends State<AppointmentsView> {
                   label: 'Start Time',
                   value: _startTime,
                   options: _startOptions,
-                  onChanged: (v) => setState(() {
-                    _startTime = v;
-                    _endTime = null;
-                  }),
+                  onChanged: _selectStart,
                 ),
               ),
               const SizedBox(width: 12),
