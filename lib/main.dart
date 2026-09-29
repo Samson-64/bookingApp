@@ -4,7 +4,9 @@ import 'app/splash_screen.dart';
 import 'app/theme.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/dashboard/screens/home_shell.dart';
+import 'features/notifications/screens/notifications_screen.dart';
 import 'features/provider/screens/specialist_shell.dart';
+import 'features/settings/screens/settings_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,6 +28,8 @@ class BookingApp extends StatelessWidget {
         LoginScreen.routeName: (_) => const LoginScreen(),
         HomeShell.routeName: (_) => const HomeShell(),
         SpecialistShell.routeName: (_) => const SpecialistShell(),
+        SettingsScreen.routeName: (_) => const SettingsScreen(),
+        NotificationsScreen.routeName: (_) => const NotificationsScreen(),
       },
     );
   }
