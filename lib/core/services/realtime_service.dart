@@ -7,6 +7,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import '../constants/api_constants.dart';
 import '../storage/token_storage.dart';
 import 'booking_hub.dart';
+import 'notification_controller.dart';
 
 /// Maintains a JWT-authenticated WebSocket to the backend's ``/api/ws``
 /// endpoint and turns ``booking_changed`` pushes into [BookingHub] refreshes.
@@ -77,8 +78,19 @@ class RealtimeService {
     if (data is! String) return;
     try {
       final json = jsonDecode(data);
-      if (json is Map && json['type'] == 'booking_changed') {
-        BookingHub.instance.invalidate();
+      if (json is! Map) return;
+      switch (json['type']) {
+        case 'booking_changed':
+          BookingHub.instance.invalidate();
+          // A status change normally produces a notification right after, so
+          // nudge the badge now rather than waiting for it to arrive.
+          NotificationController.instance.refreshUnreadCount();
+          break;
+        case 'notification':
+          // The push is a signal that something changed, not a payload to
+          // trust; the controller refetches the authoritative feed.
+          NotificationController.instance.onPushed();
+          break;
       }
     } catch (_) {
       // Non-JSON frame (e.g. ping/pong) is ignored.
