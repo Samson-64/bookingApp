@@ -49,6 +49,7 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.8
   hotreloader: ^4.4.0
 
 flutter_launcher_icons:
@@ -57,6 +58,25 @@ flutter_launcher_icons:
   image_path: "assets/images/logo.png"
   adaptive_icon_background: "#5B57A6"
   adaptive_icon_foreground: "assets/images/logo.png"
+
+# Generates the native launch screen for Android and iOS. Run with
+# `dart run flutter_native_splash:create` after changing anything here.
+# splash_logo_android12.png keeps the mark inside the 768px circle that
+# Android 12+ clips the splash icon to.
+flutter_native_splash:
+  color: "#0F172A"
+  image: "assets/images/splash_logo.png"
+  color_dark: "#0F172A"
+  image_dark: "assets/images/splash_logo.png"
+  android_gravity: center
+  ios_content_mode: center
+  web: false
+
+  android_12:
+    color: "#0F172A"
+    image: "assets/images/splash_logo_android12.png"
+    color_dark: "#0F172A"
+    image_dark: "assets/images/splash_logo_android12.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -73,6 +93,7 @@ flutter:
   assets:
     - assets/images/logo.png
     - assets/images/background.png
+    - assets/images/splash_logo.png
 
   fonts:
     - family: Poppins
