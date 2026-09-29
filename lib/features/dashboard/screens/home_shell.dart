@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/notification_controller.dart';
 import '../../../core/services/realtime_service.dart';
+import '../../../core/services/settings_controller.dart';
 import '../../../shared/models/user_model.dart';
+import '../../../shared/widgets/notification_bell.dart';
 import '../../../shared/widgets/spinner.dart';
+import '../../../features/settings/screens/settings_screen.dart';
 import '../../../features/staff/screens/staff_appointments_view.dart';
 import 'appointments_view.dart';
 import 'dashboard_view.dart';
@@ -30,6 +34,10 @@ class _HomeShellState extends State<HomeShell> {
   void initState() {
     super.initState();
     RealtimeService.instance.start();
+    // Warm the cached preferences and the unread badge once, here, so the
+    // booking screens can read them without a request of their own.
+    SettingsController.instance.load();
+    NotificationController.instance.load();
     _loadProfile();
   }
 
@@ -63,12 +71,22 @@ class _HomeShellState extends State<HomeShell> {
 
   Future<void> _signOut() async {
     await RealtimeService.instance.stop();
+    SettingsController.instance.reset();
+    NotificationController.instance.reset();
     await AuthService.instance.signOut();
     if (!mounted) return;
     Navigator.of(context).pushNamedAndRemoveUntil(
       '/login',
       (route) => false,
     );
+  }
+
+  void _openSettings() {
+    Navigator.of(context).pushNamed(SettingsScreen.routeName);
+  }
+
+  void _openMyBookings() {
+    setState(() => _index = 3);
   }
 
   void _openStaffPortal() {
@@ -97,6 +115,12 @@ class _HomeShellState extends State<HomeShell> {
               icon: const Icon(Icons.work_outline),
               onPressed: _openStaffPortal,
             ),
+          NotificationBell(onOpenBooking: _openMyBookings),
+          IconButton(
+            tooltip: 'Settings',
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: _openSettings,
+          ),
           IconButton(
             tooltip: 'Sign out',
             icon: const Icon(Icons.logout_rounded),
