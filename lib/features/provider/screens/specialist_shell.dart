@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/notification_controller.dart';
 import '../../../core/services/realtime_service.dart';
+import '../../../core/services/settings_controller.dart';
 import '../../../features/dashboard/screens/appointments_view.dart';
 import '../../../features/dashboard/screens/my_bookings_view.dart';
 import '../../../features/dashboard/screens/parking_view.dart';
+import '../../../features/settings/screens/settings_screen.dart';
 import '../../../shared/models/user_model.dart';
+import '../../../shared/widgets/notification_bell.dart';
 import '../../../shared/widgets/spinner.dart';
 import 'specialist_dashboard.dart';
 import 'specialist_profile_view.dart';
@@ -36,6 +40,8 @@ class _SpecialistShellState extends State<SpecialistShell> {
   void initState() {
     super.initState();
     RealtimeService.instance.start();
+    SettingsController.instance.load();
+    NotificationController.instance.load();
     _loadProfile();
   }
 
@@ -69,9 +75,19 @@ class _SpecialistShellState extends State<SpecialistShell> {
 
   Future<void> _signOut() async {
     await RealtimeService.instance.stop();
+    SettingsController.instance.reset();
+    NotificationController.instance.reset();
     await AuthService.instance.signOut();
     if (!mounted) return;
     Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+  }
+
+  void _openSettings() {
+    Navigator.of(context).pushNamed(SettingsScreen.routeName);
+  }
+
+  void _openMyBookings() {
+    setState(() => _index = 3);
   }
 
   @override
@@ -84,6 +100,12 @@ class _SpecialistShellState extends State<SpecialistShell> {
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
         actions: [
+          NotificationBell(onOpenBooking: _openMyBookings),
+          IconButton(
+            tooltip: 'Settings',
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: _openSettings,
+          ),
           IconButton(
             tooltip: 'Sign out',
             icon: const Icon(Icons.logout_rounded),
