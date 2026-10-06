@@ -233,8 +233,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             );
           }
 
-          // Seed the editable copies once the server value is available.
-          WidgetsBinding.instance.addPostFrameCallback((_) => _seed(settings));
+          // Seed the editable copies before building, so `_draft` is never
+          // read uninitialized. The first half of `_seed` runs synchronously;
+          // only the profile fetch happens asynchronously.
+          _seed(settings);
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
