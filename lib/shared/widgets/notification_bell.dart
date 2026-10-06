@@ -19,61 +19,114 @@ class NotificationBell extends StatefulWidget {
 }
 
 class _NotificationBellState extends State<NotificationBell> {
-  bool _open = false;
+  final OverlayPortalController _overlayController = OverlayPortalController();
+  final LayerLink _layerLink = LayerLink();
 
   static const _previewCount = 5;
 
   Future<void> _openList() async {
-    setState(() => _open = true);
+    if (!_overlayController.isShowing) _overlayController.show();
     await NotificationController.instance.refresh();
     if (mounted) setState(() {});
   }
 
+  void _toggle() {
+    if (_overlayController.isShowing) {
+      _overlayController.hide();
+    } else {
+      _openList();
+    }
+  }
+
+  void _close() {
+    if (_overlayController.isShowing) _overlayController.hide();
+  }
+
+  @override
+  void dispose() {
+    if (_overlayController.isShowing) _overlayController.hide();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: NotificationController.instance,
-      builder: (context, _) {
-        final controller = NotificationController.instance;
-        return Stack(
-          clipBehavior: Clip.none,
-          children: [
-            IconButton(
-              tooltip: controller.unreadCount > 0
-                  ? 'Notifications, ${controller.unreadCount} unread'
-                  : 'Notifications',
-              icon: const Icon(Icons.notifications_none_rounded),
-              onPressed: _openList,
-            ),
-            if (controller.unreadCount > 0)
-              Positioned(
-                right: 6,
-                top: 6,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                  decoration: const BoxDecoration(
-                    color: AppColors.indigo600,
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                  ),
-                  constraints: const BoxConstraints(minWidth: 16),
-                  child: Text(
-                    controller.unreadCount > 99
-                        ? '99+'
-                        : '${controller.unreadCount}',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
+    return OverlayPortal(
+      controller: _overlayController,
+      overlayChildBuilder: (_) => _buildOverlay(),
+      child: AnimatedBuilder(
+        animation: NotificationController.instance,
+        builder: (context, _) {
+          final controller = NotificationController.instance;
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              CompositedTransformTarget(
+                link: _layerLink,
+                child: IconButton(
+                  tooltip: controller.unreadCount > 0
+                      ? 'Notifications, ${controller.unreadCount} unread'
+                      : 'Notifications',
+                  icon: const Icon(Icons.notifications_none_rounded),
+                  onPressed: _toggle,
+                ),
+              ),
+              if (controller.unreadCount > 0)
+                Positioned(
+                  right: 6,
+                  top: 6,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                    decoration: const BoxDecoration(
+                      color: AppColors.indigo600,
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
+                    constraints: const BoxConstraints(minWidth: 16),
+                    child: Text(
+                      controller.unreadCount > 99
+                          ? '99+'
+                          : '${controller.unreadCount}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            if (_open) _buildPanel(context, controller),
-          ],
-        );
-      },
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  /// Renders the dropdown in the app's root [Overlay] instead of inside the
+  /// app bar's `Stack`, so it is neither clipped by the toolbar's bounds nor
+  /// unreachable by hit testing.
+  Widget _buildOverlay() {
+    final controller = NotificationController.instance;
+    return Positioned.fill(
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: _close,
+              child: const SizedBox.expand(),
+            ),
+          ),
+          CompositedTransformFollower(
+            link: _layerLink,
+            showWhenUnlinked: false,
+            targetAnchor: Alignment.bottomRight,
+            followerAnchor: Alignment.topRight,
+            offset: const Offset(0, 8),
+            child: _buildPanel(context, controller),
+          ),
+        ],
+      ),
     );
   }
 
@@ -82,9 +135,7 @@ class _NotificationBellState extends State<NotificationBell> {
     NotificationController controller,
   ) {
     final preview = controller.items.take(_previewCount).toList();
-    return Positioned(
-      right: 0,
-      top: 52,
+    return SizedBox(
       width: 320,
       child: Material(
         elevation: 8,
@@ -178,14 +229,17 @@ class _NotificationBellState extends State<NotificationBell> {
                           itemCount: preview.length,
                           separatorBuilder: (_, _) =>
                               const Divider(height: 1, color: AppColors.slate50),
-                          itemBuilder: (context, i) =>
-                              _NotificationRow(preview[i], widget.onOpenBooking),
+                          itemBuilder: (context, i) => _NotificationRow(
+                            preview[i],
+                            widget.onOpenBooking,
+                            onClose: _close,
+                          ),
                         ),
             ),
             const Divider(height: 1),
             TextButton(
               onPressed: () {
-                setState(() => _open = false);
+                _close();
                 Navigator.of(context).pushNamed('/notifications');
               },
               style: TextButton.styleFrom(
@@ -215,8 +269,9 @@ class _NotificationBellState extends State<NotificationBell> {
 class _NotificationRow extends StatelessWidget {
   final AppNotification notification;
   final VoidCallback? onOpenBooking;
+  final VoidCallback onClose;
 
-  const _NotificationRow(this.notification, this.onOpenBooking);
+  const _NotificationRow(this.notification, this.onOpenBooking, {required this.onClose});
 
   @override
   Widget build(BuildContext context) {
@@ -232,6 +287,7 @@ class _NotificationRow extends StatelessWidget {
 
     return InkWell(
       onTap: () {
+        onClose();
         NotificationController.instance.markRead(notification.id);
         if (notification.bookingId != null) onOpenBooking?.call();
       },
