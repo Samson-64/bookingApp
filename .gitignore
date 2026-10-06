@@ -50,5 +50,7 @@ android/key.properties
 /android/app/debug
 /android/app/profile
 /android/app/release
+/android/app/build/
+/android/build/
 # Widget Preview related
 .widget_preview/
