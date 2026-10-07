@@ -31,10 +31,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Notifications',
-          style: TextStyle(fontWeight: FontWeight.w700),
-        ),
+        title: Text('Notifications'),
         actions: const [NotificationBell(), SizedBox(width: 8)],
       ),
       body: AnimatedBuilder(
@@ -52,42 +49,47 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
           return RefreshIndicator(
             onRefresh: controller.refresh,
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-              children: [
-                _header(controller),
-                const SizedBox(height: 12),
-                _filterRow(controller),
-                const SizedBox(height: 16),
-                if (controller.error.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: ErrorState(
-                      message: controller.error,
-                      onRetry: controller.refresh,
-                    ),
-                  ),
-                if (visible.isEmpty)
-                  EmptyState(
-                    icon: _showUnreadOnly
-                        ? Icons.mark_email_read_outlined
-                        : Icons.notifications_none_rounded,
-                    title: _showUnreadOnly
-                        ? 'No unread notifications'
-                        : 'No notifications yet',
-                    message: _showUnreadOnly
-                        ? 'Everything here has been read.'
-                        : 'When a booking is confirmed, changed or about to '
-                            'start, it will show up here.',
-                  )
-                else
-                  ...visible.map(
-                    (n) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: _NotificationCard(notification: n),
-                    ),
-                  ),
-              ],
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 640),
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                  children: [
+                    _header(controller),
+                    const SizedBox(height: 12),
+                    _filterRow(controller),
+                    const SizedBox(height: 16),
+                    if (controller.error.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: ErrorState(
+                          message: controller.error,
+                          onRetry: controller.refresh,
+                        ),
+                      ),
+                    if (visible.isEmpty)
+                      EmptyState(
+                        icon: _showUnreadOnly
+                            ? Icons.mark_email_read_outlined
+                            : Icons.notifications_none_rounded,
+                        title: _showUnreadOnly
+                            ? 'No unread notifications'
+                            : 'No notifications yet',
+                        message: _showUnreadOnly
+                            ? 'Everything here has been read.'
+                            : 'When a booking is confirmed, changed or about to '
+                                  'start, it will show up here.',
+                      )
+                    else
+                      ...visible.map(
+                        (n) => Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: _NotificationCard(notification: n),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ),
           );
         },
@@ -126,10 +128,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          chip('All', controller.items.length, !_showUnreadOnly,
-              () => setState(() => _showUnreadOnly = false)),
-          chip('Unread', controller.unreadCount, _showUnreadOnly,
-              () => setState(() => _showUnreadOnly = true)),
+          chip(
+            'All',
+            controller.items.length,
+            !_showUnreadOnly,
+            () => setState(() => _showUnreadOnly = false),
+          ),
+          chip(
+            'Unread',
+            controller.unreadCount,
+            _showUnreadOnly,
+            () => setState(() => _showUnreadOnly = true),
+          ),
         ],
       ),
     );
@@ -143,10 +153,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             controller.unreadCount > 0
                 ? '${controller.unreadCount} unread'
                 : "You're all caught up.",
-            style: const TextStyle(
-              fontSize: 13,
-              color: AppColors.slate500,
-            ),
+            style: const TextStyle(fontSize: 13, color: AppColors.slate500),
           ),
         ),
         if (controller.unreadCount > 0)
@@ -155,7 +162,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             icon: const Icon(Icons.done_all_rounded, size: 16),
             label: const Text('Mark all read'),
             style: TextButton.styleFrom(
-              foregroundColor: AppColors.indigo600,
+              foregroundColor: AppColors.accent,
               padding: const EdgeInsets.symmetric(horizontal: 8),
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -175,25 +182,25 @@ class _NotificationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final (icon, tint, label) = switch (notification.category) {
       NotificationCategory.bookingStatus => (
-          Icons.event_rounded,
-          AppColors.indigo600,
-          'Booking update',
-        ),
+        Icons.event_rounded,
+        AppColors.accent,
+        'Booking update',
+      ),
       NotificationCategory.newBooking => (
-          Icons.auto_awesome_rounded,
-          AppColors.emerald600,
-          'New booking',
-        ),
+        Icons.auto_awesome_rounded,
+        AppColors.emerald600,
+        'New booking',
+      ),
       NotificationCategory.reminder => (
-          Icons.alarm_rounded,
-          AppColors.amber600,
-          'Reminder',
-        ),
+        Icons.alarm_rounded,
+        AppColors.amber600,
+        'Reminder',
+      ),
       NotificationCategory.system => (
-          Icons.info_outline_rounded,
-          AppColors.slate600,
-          'System',
-        ),
+        Icons.info_outline_rounded,
+        AppColors.slate600,
+        'System',
+      ),
     };
 
     return Container(
@@ -203,7 +210,7 @@ class _NotificationCard extends StatelessWidget {
         border: Border.all(
           color: notification.read
               ? AppColors.slate200
-              : AppColors.indigo600.withValues(alpha: 0.3),
+              : AppColors.accent.withValues(alpha: 0.3),
         ),
       ),
       padding: const EdgeInsets.all(14),
@@ -243,18 +250,19 @@ class _NotificationCard extends StatelessWidget {
                           Container(
                             margin: const EdgeInsets.only(left: 8, top: 2),
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
-                              color: AppColors.indigo50,
+                              color: AppColors.accentLight,
                               borderRadius: BorderRadius.circular(999),
                             ),
                             child: const Text(
-                              'NEW',
+                              'New',
                               style: TextStyle(
-                                fontSize: 8,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
-                                color: AppColors.indigo600,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.accent,
                               ),
                             ),
                           ),
@@ -274,8 +282,11 @@ class _NotificationCard extends StatelessWidget {
               IconButton(
                 tooltip: 'Delete',
                 visualDensity: VisualDensity.compact,
-                icon: const Icon(Icons.close_rounded,
-                    size: 16, color: AppColors.slate400),
+                icon: const Icon(
+                  Icons.close_rounded,
+                  size: 16,
+                  color: AppColors.slate400,
+                ),
                 onPressed: () =>
                     NotificationController.instance.delete(notification.id),
               ),
@@ -294,12 +305,11 @@ class _NotificationCard extends StatelessWidget {
           Row(
             children: [
               Text(
-                label.toUpperCase(),
+                label,
                 style: const TextStyle(
-                  fontSize: 9,
+                  fontSize: 10,
                   fontWeight: FontWeight.w600,
-                  letterSpacing: 0.6,
-                  color: AppColors.slate400,
+                  color: AppColors.slate500,
                 ),
               ),
               const Spacer(),
@@ -308,17 +318,14 @@ class _NotificationCard extends StatelessWidget {
                   onPressed: () =>
                       NotificationController.instance.markRead(notification.id),
                   style: TextButton.styleFrom(
-                    foregroundColor: AppColors.indigo600,
+                    foregroundColor: AppColors.accent,
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   child: const Text(
                     'Mark as read',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
                   ),
                 ),
             ],
