@@ -38,7 +38,7 @@ class StatusBadge extends StatelessWidget {
     return switch (s) {
       'PENDING' => (AppColors.amber50, AppColors.amber600, 'Pending'),
       'CONFIRMED' => (AppColors.emerald50, AppColors.emerald600, 'Confirmed'),
-      'COMPLETED' => (const Color(0xFFDBEAFE), AppColors.indigo600, 'Completed'),
+      'COMPLETED' => (AppColors.accentLight, AppColors.accent, 'Completed'),
       'CANCELLED' => (AppColors.rose50, AppColors.rose600, 'Cancelled'),
       _ => (AppColors.slate100, AppColors.slate500, s),
     };
