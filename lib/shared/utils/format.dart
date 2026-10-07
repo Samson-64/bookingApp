@@ -31,7 +31,7 @@ String dateKey(DateTime d) =>
 
 String greeting() {
   final h = DateTime.now().hour;
-  if (h < 12) return 'Good Morning';
+  if (h < 12) return 'Good morning';
   if (h < 17) return 'Good Afternoon';
   return 'Good Evening';
 }
