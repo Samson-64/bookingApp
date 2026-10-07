@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/theme.dart';
+import '../../../core/services/parking_service.dart';
 import '../../../shared/models/parking_space_model.dart';
 import '../../../shared/utils/format.dart';
+import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_state.dart';
+import '../../../shared/widgets/spinner.dart';
 import 'parking_booking_view.dart';
 
 class ParkingFloorView extends StatefulWidget {
@@ -23,11 +26,41 @@ class ParkingFloorView extends StatefulWidget {
 class _ParkingFloorViewState extends State<ParkingFloorView> {
   DateTime _date = DateTime.now();
   String? _error;
+  bool _loading = false;
+  late List<ParkingSpace> _spaces;
 
-  int get _availableCount => widget.spaces.where((s) => s.isAvailable).length;
+  int get _availableCount => _spaces.where((s) => s.isAvailable).length;
+
+  @override
+  void initState() {
+    super.initState();
+    _spaces = widget.spaces;
+  }
 
   Future<void> _changeDate(DateTime d) async {
     setState(() => _date = d);
+    await _load();
+  }
+
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final results = <ParkingSpace>[];
+      for (final s in widget.spaces) {
+        final a = await ParkingService.instance.fetchAvailability(
+          spaceId: s.id,
+          date: dateKey(_date),
+        );
+        results.add(s.copyWith(isAvailable: a.working));
+      }
+      if (mounted) setState(() => _spaces = results);
+    } catch (e) {
+      if (mounted) setState(() => _error = e.toString());
+    }
+    if (mounted) setState(() => _loading = false);
   }
 
   @override
@@ -35,86 +68,69 @@ class _ParkingFloorViewState extends State<ParkingFloorView> {
     return Scaffold(
       appBar: AppBar(),
       body: RefreshIndicator(
-        onRefresh: () async {},
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.arrow_back_ios,
-                    size: 14,
-                    color: AppColors.slate600,
-                  ),
-                  SizedBox(width: 4),
-                  Text(
-                    'Back to Floors',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.slate600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
+        onRefresh: _load,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.floor.toUpperCase(),
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.slate900,
-                        ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(widget.floor, style: AppType.pageTitle),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Pick a date and choose an available parking bay to reserve.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.slate500,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Pick a date and choose an available parking bay to reserve.',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.slate500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.slate50,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    '$_availableCount Available',
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.slate700,
                     ),
-                  ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.slate50,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        '$_availableCount available',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.slate700,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 16),
+                _buildDateSelector(),
+                const SizedBox(height: 16),
+                if (_loading)
+                  const Center(child: Spinner(label: 'Checking availability…'))
+                else if (_error != null)
+                  ErrorState(message: _error!, onRetry: _load)
+                else if (_spaces.isEmpty)
+                  const EmptyState(
+                    title: 'No parking slots on this floor',
+                    icon: Icons.local_parking,
+                  )
+                else
+                  ..._spaces.map((s) => _slotCard(s)),
               ],
             ),
-            const SizedBox(height: 16),
-            _buildDateSelector(),
-            const SizedBox(height: 16),
-            if (_error != null)
-              ErrorState(message: _error!, onRetry: () {})
-            else
-              ...widget.spaces.map((s) => _slotCard(s)),
-          ],
+          ),
         ),
       ),
     );
@@ -184,7 +200,7 @@ class _ParkingFloorViewState extends State<ParkingFloorView> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: isAvail ? AppColors.slate600 : AppColors.slate400,
+                  color: isAvail ? AppColors.accent : AppColors.slate400,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 alignment: Alignment.center,
@@ -236,7 +252,7 @@ class _ParkingFloorViewState extends State<ParkingFloorView> {
             ],
           ),
           const SizedBox(height: 12),
-          Divider(height: 1, color: Colors.grey.withAlpha(30)),
+          Divider(height: 1, color: AppColors.slate200),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
@@ -258,7 +274,7 @@ class _ParkingFloorViewState extends State<ParkingFloorView> {
                   : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: isAvail
-                    ? AppColors.slate900
+                    ? AppColors.accent
                     : AppColors.slate300,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
