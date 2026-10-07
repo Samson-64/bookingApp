@@ -7,6 +7,7 @@ import '../../../core/services/settings_controller.dart';
 import '../../../core/services/settings_service.dart';
 import '../../auth/screens/login_screen.dart';
 import '../../../shared/models/user_settings_model.dart';
+import '../../../shared/widgets/error_state.dart';
 import '../../../shared/widgets/notification_bell.dart';
 import '../../../shared/widgets/spinner.dart';
 
@@ -188,10 +189,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     SettingsController.instance.reset();
     await AuthService.instance.signOut();
     if (!mounted) return;
-    Navigator.of(context).pushNamedAndRemoveUntil(
-      LoginScreen.routeName,
-      (route) => false,
-    );
+    Navigator.of(
+      context,
+    ).pushNamedAndRemoveUntil(LoginScreen.routeName, (route) => false);
   }
 
   String _leadLabel(int minutes) {
@@ -222,14 +222,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             if (controller.loading || !controller.loaded) {
               return const Spinner(label: 'Loading settings…');
             }
-            return Center(
-              child: TextButton(
-                onPressed: () => controller.load(force: true),
-                child: Text(
+            return ErrorState(
+              message:
                   controller.error ?? 'Failed to load settings — tap to retry',
-                  textAlign: TextAlign.center,
-                ),
-              ),
+              onRetry: () => controller.load(force: true),
             );
           }
 
@@ -238,253 +234,299 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // only the profile fetch happens asynchronously.
           _seed(settings);
 
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
-            children: [
-              _section(
-                step: 1,
-                title: 'Account',
-                subtitle: 'Your name and email address.',
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 640),
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
                 children: [
-                  TextField(
-                    controller: _nameController,
-                    textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(labelText: 'Full name'),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration:
-                        const InputDecoration(labelText: 'Email address'),
-                  ),
-                  if (_profileError != null) ...[
-                    const SizedBox(height: 10),
-                    _errorText(_profileError!),
-                  ],
-                  const SizedBox(height: 14),
-                  _saveButton(
-                    label: 'Update profile',
-                    busy: _savingProfile,
-                    onPressed: _saveProfile,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _section(
-                step: 2,
-                title: 'Notifications',
-                subtitle: 'Choose what you hear about, and when.',
-                children: [
-                  _switchRow(
-                    label: 'Booking updates',
-                    description:
-                        'When one of your bookings is confirmed, completed or cancelled.',
-                    value: _draft.notifyBookingUpdates,
-                    onChanged: (v) => setState(() => _draft =
-                        _draft.copyWith(notifyBookingUpdates: v)),
-                  ),
-                  _switchRow(
-                    label: 'New bookings',
-                    description: 'When a new appointment is assigned to you.',
-                    value: _draft.notifyNewBookings,
-                    onChanged: (v) => setState(
-                        () => _draft = _draft.copyWith(notifyNewBookings: v)),
-                  ),
-                  _switchRow(
-                    label: 'Reminders',
-                    description: 'A nudge shortly before a booking starts.',
-                    value: _draft.notifyReminders,
-                    onChanged: (v) => setState(
-                        () => _draft = _draft.copyWith(notifyReminders: v)),
-                  ),
-                  if (_draft.notifyReminders) ...[
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<int>(
-                      initialValue: _draft.reminderMinutesBefore,
-                      decoration: const InputDecoration(labelText: 'Remind me'),
-                      items: _reminderLeads
-                          .map((m) => DropdownMenuItem(
-                                value: m,
-                                child: Text(_leadLabel(m)),
-                              ))
-                          .toList(),
-                      onChanged: (v) => setState(() => _draft =
-                          _draft.copyWith(reminderMinutesBefore: v ?? 60)),
-                    ),
-                  ],
-                  const Divider(height: 28),
-                  _switchRow(
-                    label: 'Quiet hours',
-                    description:
-                        'Hold reminders during these hours. Booking updates are always kept.',
-                    value: _draft.quietHoursEnabled,
-                    onChanged: (v) => setState(
-                        () => _draft = _draft.copyWith(quietHoursEnabled: v)),
-                  ),
-                  if (_draft.quietHoursEnabled) ...[
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _timeField(
-                            label: 'From',
-                            value: _draft.quietHoursStart,
-                            onChanged: (v) => setState(
-                                () => _draft = _draft.copyWith(quietHoursStart: v)),
-                          ),
+                  _section(
+                    step: 1,
+                    title: 'Account',
+                    subtitle: 'Your name and email address.',
+                    children: [
+                      TextField(
+                        controller: _nameController,
+                        textInputAction: TextInputAction.next,
+                        decoration: const InputDecoration(
+                          labelText: 'Full name',
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _timeField(
-                            label: 'Until',
-                            value: _draft.quietHoursEnd,
-                            onChanged: (v) => setState(
-                                () => _draft = _draft.copyWith(quietHoursEnd: v)),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: const InputDecoration(
+                          labelText: 'Email address',
+                        ),
+                      ),
+                      if (_profileError != null) ...[
+                        const SizedBox(height: 10),
+                        _errorText(_profileError!),
+                      ],
+                      const SizedBox(height: 14),
+                      _saveButton(
+                        label: 'Update profile',
+                        busy: _savingProfile,
+                        onPressed: _saveProfile,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  _section(
+                    step: 2,
+                    title: 'Notifications',
+                    subtitle: 'Choose what you hear about, and when.',
+                    children: [
+                      _switchRow(
+                        label: 'Booking updates',
+                        description:
+                            'When one of your bookings is confirmed, completed or cancelled.',
+                        value: _draft.notifyBookingUpdates,
+                        onChanged: (v) => setState(
+                          () =>
+                              _draft = _draft.copyWith(notifyBookingUpdates: v),
+                        ),
+                      ),
+                      _switchRow(
+                        label: 'New bookings',
+                        description:
+                            'When a new appointment is assigned to you.',
+                        value: _draft.notifyNewBookings,
+                        onChanged: (v) => setState(
+                          () => _draft = _draft.copyWith(notifyNewBookings: v),
+                        ),
+                      ),
+                      _switchRow(
+                        label: 'Reminders',
+                        description: 'A nudge shortly before a booking starts.',
+                        value: _draft.notifyReminders,
+                        onChanged: (v) => setState(
+                          () => _draft = _draft.copyWith(notifyReminders: v),
+                        ),
+                      ),
+                      if (_draft.notifyReminders) ...[
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<int>(
+                          initialValue: _draft.reminderMinutesBefore,
+                          decoration: const InputDecoration(
+                            labelText: 'Remind me',
+                          ),
+                          items: _reminderLeads
+                              .map(
+                                (m) => DropdownMenuItem(
+                                  value: m,
+                                  child: Text(_leadLabel(m)),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (v) => setState(
+                            () => _draft = _draft.copyWith(
+                              reminderMinutesBefore: v ?? 60,
+                            ),
                           ),
                         ),
                       ],
-                    ),
-                  ],
-                ],
-              ),
-              const SizedBox(height: 16),
-              _section(
-                step: 3,
-                title: 'Booking defaults',
-                subtitle: 'Pre-selected when you make a new booking.',
-                children: [
-                  DropdownButtonFormField<int>(
-                    initialValue: _draft.defaultDurationMinutes,
-                    decoration:
-                        const InputDecoration(labelText: 'Default duration'),
-                    items: _durations
-                        .map((m) => DropdownMenuItem(
-                              value: m,
-                              child: Text('$m minutes'),
-                            ))
-                        .toList(),
-                    onChanged: (v) => setState(() => _draft =
-                        _draft.copyWith(defaultDurationMinutes: v ?? 60)),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _floorController,
-                    decoration: const InputDecoration(
-                      labelText: 'Preferred parking floor',
-                      hintText: 'e.g. Ground',
-                      helperText: 'Leave blank for no preference.',
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    initialValue: _draft.timezone,
-                    decoration: const InputDecoration(
-                      labelText: 'Timezone',
-                      helperText: 'IANA name, e.g. Africa/Johannesburg',
-                    ),
-                    onChanged: (v) =>
-                        setState(() => _draft = _draft.copyWith(timezone: v)),
-                  ),
-                  if (_preferencesError != null) ...[
-                    const SizedBox(height: 10),
-                    _errorText(_preferencesError!),
-                  ],
-                  const SizedBox(height: 14),
-                  _saveButton(
-                    label: 'Save preferences',
-                    busy: _savingPreferences,
-                    onPressed: _savePreferences,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _section(
-                step: 4,
-                title: 'Security',
-                subtitle: 'Password and active sessions.',
-                children: [
-                  TextField(
-                    controller: _currentPassword,
-                    obscureText: true,
-                    decoration:
-                        const InputDecoration(labelText: 'Current password'),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _newPassword,
-                    obscureText: true,
-                    onChanged: (_) => setState(() {}),
-                    decoration: const InputDecoration(labelText: 'New password'),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _confirmPassword,
-                    obscureText: true,
-                    onChanged: (_) => setState(() {}),
-                    decoration: InputDecoration(
-                      labelText: 'Confirm new password',
-                      helperText: 'Changing your password signs you out '
-                          'everywhere, including this device.',
-                      errorText: _passwordProblem,
-                    ),
-                  ),
-                  if (_passwordError != null) ...[
-                    const SizedBox(height: 10),
-                    _errorText(_passwordError!),
-                  ],
-                  const SizedBox(height: 14),
-                  _saveButton(
-                    label: 'Update password',
-                    busy: _savingPassword,
-                    onPressed: _changePassword,
-                    enabled: _currentPassword.text.isNotEmpty &&
-                        _newPassword.text.isNotEmpty &&
-                        _confirmPassword.text.isNotEmpty &&
-                        _passwordProblem == null,
-                  ),
-                  const Divider(height: 28),
-                  const Text(
-                    'Sign out of all devices',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.slate900,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  const Text(
-                    'Ends every active session, including this one.',
-                    style: TextStyle(fontSize: 12, color: AppColors.slate500),
-                  ),
-                  if (_sessionsError != null) ...[
-                    const SizedBox(height: 10),
-                    _errorText(_sessionsError!),
-                  ],
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: _revoking ? null : _revokeSessions,
-                    icon: _revoking
-                        ? const SizedBox(
-                            width: 14,
-                            height: 14,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.logout_rounded, size: 18),
-                    label: const Text('Sign out everywhere'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.rose600,
-                      side: const BorderSide(color: AppColors.rose600),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                      const Divider(height: 28),
+                      _switchRow(
+                        label: 'Quiet hours',
+                        description:
+                            'Hold reminders during these hours. Booking updates are always kept.',
+                        value: _draft.quietHoursEnabled,
+                        onChanged: (v) => setState(
+                          () => _draft = _draft.copyWith(quietHoursEnabled: v),
+                        ),
                       ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 14),
-                    ),
+                      if (_draft.quietHoursEnabled) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _timeField(
+                                label: 'From',
+                                value: _draft.quietHoursStart,
+                                onChanged: (v) => setState(
+                                  () => _draft = _draft.copyWith(
+                                    quietHoursStart: v,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _timeField(
+                                label: 'Until',
+                                value: _draft.quietHoursEnd,
+                                onChanged: (v) => setState(
+                                  () => _draft = _draft.copyWith(
+                                    quietHoursEnd: v,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  _section(
+                    step: 3,
+                    title: 'Booking defaults',
+                    subtitle: 'Pre-selected when you make a new booking.',
+                    children: [
+                      DropdownButtonFormField<int>(
+                        initialValue: _draft.defaultDurationMinutes,
+                        decoration: const InputDecoration(
+                          labelText: 'Default duration',
+                        ),
+                        items: _durations
+                            .map(
+                              (m) => DropdownMenuItem(
+                                value: m,
+                                child: Text('$m minutes'),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (v) => setState(
+                          () => _draft = _draft.copyWith(
+                            defaultDurationMinutes: v ?? 60,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _floorController,
+                        decoration: const InputDecoration(
+                          labelText: 'Preferred parking floor',
+                          hintText: 'e.g. Ground',
+                          helperText: 'Leave blank for no preference.',
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        initialValue: _draft.timezone,
+                        decoration: const InputDecoration(
+                          labelText: 'Timezone',
+                          helperText: 'IANA name, e.g. Africa/Johannesburg',
+                        ),
+                        onChanged: (v) => setState(
+                          () => _draft = _draft.copyWith(timezone: v),
+                        ),
+                      ),
+                      if (_preferencesError != null) ...[
+                        const SizedBox(height: 10),
+                        _errorText(_preferencesError!),
+                      ],
+                      const SizedBox(height: 14),
+                      _saveButton(
+                        label: 'Save preferences',
+                        busy: _savingPreferences,
+                        onPressed: _savePreferences,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  _section(
+                    step: 4,
+                    title: 'Security',
+                    subtitle: 'Password and active sessions.',
+                    children: [
+                      TextField(
+                        controller: _currentPassword,
+                        obscureText: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Current password',
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _newPassword,
+                        obscureText: true,
+                        onChanged: (_) => setState(() {}),
+                        decoration: const InputDecoration(
+                          labelText: 'New password',
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _confirmPassword,
+                        obscureText: true,
+                        onChanged: (_) => setState(() {}),
+                        decoration: InputDecoration(
+                          labelText: 'Confirm new password',
+                          helperText:
+                              'Changing your password signs you out '
+                              'everywhere, including this device.',
+                          errorText: _passwordProblem,
+                        ),
+                      ),
+                      if (_passwordError != null) ...[
+                        const SizedBox(height: 10),
+                        _errorText(_passwordError!),
+                      ],
+                      const SizedBox(height: 14),
+                      _saveButton(
+                        label: 'Update password',
+                        busy: _savingPassword,
+                        onPressed: _changePassword,
+                        enabled:
+                            _currentPassword.text.isNotEmpty &&
+                            _newPassword.text.isNotEmpty &&
+                            _confirmPassword.text.isNotEmpty &&
+                            _passwordProblem == null,
+                      ),
+                      const Divider(height: 28),
+                      const Text(
+                        'Sign out of all devices',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.slate900,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      const Text(
+                        'Ends every active session, including this one.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.slate500,
+                        ),
+                      ),
+                      if (_sessionsError != null) ...[
+                        const SizedBox(height: 10),
+                        _errorText(_sessionsError!),
+                      ],
+                      const SizedBox(height: 12),
+                      OutlinedButton.icon(
+                        onPressed: _revoking ? null : _revokeSessions,
+                        icon: _revoking
+                            ? const SizedBox(
+                                width: 14,
+                                height: 14,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.logout_rounded, size: 18),
+                        label: const Text('Sign out everywhere'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.rose600,
+                          side: const BorderSide(color: AppColors.rose600),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 14,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           );
         },
       ),
@@ -510,13 +552,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _errorText(String message) => Text(
-        message,
-        style: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: AppColors.rose600,
-        ),
-      );
+    message,
+    style: const TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w600,
+      color: AppColors.rose600,
+    ),
+  );
 
   Widget _saveButton({
     required String label,
@@ -533,7 +575,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 width: 16,
                 height: 16,
                 child: CircularProgressIndicator(
-                    strokeWidth: 2, color: Colors.white),
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
               )
             : Text(label),
       ),
