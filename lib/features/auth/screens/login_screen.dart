@@ -180,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: AppColors.slate900,
+            color: AppColors.accent,
             borderRadius: BorderRadius.circular(12),
           ),
           alignment: Alignment.center,
@@ -192,10 +192,11 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         const SizedBox(width: 10),
         Text(
-          'Booking Portal',
+          'PulseBook',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             color: AppColors.slate900,
             fontSize: 22,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ],
@@ -207,7 +208,7 @@ class _LoginScreenState extends State<LoginScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          isRegister ? 'Create your account' : 'Welcome Back',
+          isRegister ? 'Create your account' : 'Welcome back',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             color: AppColors.slate900,
             fontSize: 26,
@@ -250,7 +251,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: active ? AppColors.slate900 : Colors.transparent,
+                  color: active ? AppColors.accent : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -332,7 +333,7 @@ class _LoginScreenState extends State<LoginScreen> {
         _AuthField(
           controller: _passwordController,
           label: 'Password',
-          hint: 'Enter your Password',
+          hint: 'Enter your password',
           icon: Icons.lock_outline_rounded,
           obscure: !_showPassword,
           textInputAction: TextInputAction.done,
@@ -513,7 +514,7 @@ class _AccountTypeCard extends StatelessWidget {
               width: 34,
               height: 34,
               decoration: BoxDecoration(
-                color: active ? AppColors.slate900 : AppColors.slate100,
+                color: active ? AppColors.accent : AppColors.slate100,
                 borderRadius: BorderRadius.circular(10),
               ),
               alignment: Alignment.center,
