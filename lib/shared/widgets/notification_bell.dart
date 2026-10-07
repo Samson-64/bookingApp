@@ -78,7 +78,7 @@ class _NotificationBellState extends State<NotificationBell> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                     decoration: const BoxDecoration(
-                      color: AppColors.indigo600,
+                      color: AppColors.accent,
                       borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
                     constraints: const BoxConstraints(minWidth: 16),
@@ -175,7 +175,7 @@ class _NotificationBellState extends State<NotificationBell> {
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.indigo600,
+                          color: AppColors.accent,
                         ),
                       ),
                     ),
@@ -277,7 +277,7 @@ class _NotificationRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final (icon, tint) = switch (notification.category) {
       NotificationCategory.bookingStatus =>
-        (Icons.event_rounded, AppColors.indigo600),
+        (Icons.event_rounded, AppColors.accent),
       NotificationCategory.newBooking =>
         (Icons.auto_awesome_rounded, AppColors.emerald600),
       NotificationCategory.reminder =>
@@ -294,7 +294,7 @@ class _NotificationRow extends StatelessWidget {
       child: Container(
         color: notification.read
             ? Colors.white
-            : AppColors.indigo50.withValues(alpha: 0.35),
+            : AppColors.accentLight.withValues(alpha: 0.55),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
