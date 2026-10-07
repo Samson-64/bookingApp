@@ -7,10 +7,11 @@ import '../../../shared/models/booking_model.dart';
 import '../../../shared/models/user_model.dart';
 import '../../../shared/utils/format.dart';
 import '../../../shared/widgets/booking_card.dart';
+import '../../../shared/widgets/booking_summary_sheet.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_state.dart';
 import '../../../shared/widgets/metric_card.dart';
-import '../../../shared/widgets/spinner.dart';
+import '../../../shared/widgets/skeleton.dart';
 
 class DashboardView extends StatefulWidget {
   final AppUser user;
@@ -100,7 +101,7 @@ class _DashboardViewState extends State<DashboardView> {
     return RefreshIndicator(
       onRefresh: _load,
       child: _loading
-          ? const Spinner(label: 'Loading bookings…')
+          ? const BookingListSkeleton()
           : _error != null
           ? ErrorState(message: _error!, onRetry: _load)
           : _buildContent(),
@@ -108,94 +109,92 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   Widget _buildContent() {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        // Header
-        Text(
-          '$_greeting, ${widget.user.name}',
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: AppColors.slate900,
-          ),
-        ),
-        const SizedBox(height: 16),
-        // Metric cards
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          childAspectRatio: 1.3,
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 640),
+        child: ListView(
+          padding: const EdgeInsets.all(16),
           children: [
-            MetricCard(
-              label: "TODAY'S",
-              value: '$_todayCount',
-              icon: Icons.calendar_today,
-              hero: true,
-              footer: '${_bookings.where((b) => b.isUpcoming).length} upcoming',
-              footerAction: 'View ›',
-              onTap: () => _goToTab(3),
+            // Header
+            Text('$_greeting, ${widget.user.name}', style: AppType.pageTitle),
+            const SizedBox(height: 16),
+            // Metric cards
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 1.3,
+              children: [
+                MetricCard(
+                  label: "Today's",
+                  value: '$_todayCount',
+                  icon: Icons.calendar_today,
+                  hero: true,
+                  footer:
+                      '${_bookings.where((b) => b.isUpcoming).length} upcoming',
+                  footerAction: 'View →',
+                  onTap: () => _goToTab(3),
+                ),
+                MetricCard(
+                  label: 'Appointments',
+                  value: '$_upcomingApptCount',
+                  icon: Icons.trending_up,
+                  iconBg: AppColors.emerald50,
+                  iconFg: AppColors.emerald600,
+                  footer: 'Scheduled',
+                  footerAction: 'Book →',
+                  onTap: () => _goToTab(1),
+                ),
+                MetricCard(
+                  label: 'Parking',
+                  value: '$_upcomingParkingCount',
+                  icon: Icons.local_parking,
+                  footer: 'Multi-floor',
+                  footerAction: 'Browse →',
+                  onTap: () => _goToTab(2),
+                ),
+                MetricCard(
+                  label: 'Confirmed',
+                  value: '$_confirmedCount',
+                  icon: Icons.check_circle_outline,
+                  footer: 'All-time',
+                  footerAction: 'History →',
+                  onTap: () => _goToTab(3),
+                ),
+              ],
             ),
-            MetricCard(
-              label: 'APPOINTMENTS',
-              value: '$_upcomingApptCount',
-              icon: Icons.trending_up,
-              iconBg: AppColors.emerald50,
-              iconFg: AppColors.emerald600,
-              footer: 'Scheduled',
-              footerAction: 'Book →',
-              onTap: () => _goToTab(1),
-            ),
-            MetricCard(
-              label: 'PARKING',
-              value: '$_upcomingParkingCount',
-              icon: Icons.local_parking,
-              footer: 'Multi-floor',
-              footerAction: 'Browse →',
-              onTap: () => _goToTab(2),
-            ),
-            MetricCard(
-              label: 'CONFIRMED',
-              value: '$_confirmedCount',
-              icon: Icons.check_circle_outline,
-              footer: 'All-time',
-              footerAction: 'History →',
-              onTap: () => _goToTab(3),
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
-        // Tab bar
-        _buildTabBar(),
-        const SizedBox(height: 12),
-        // Booking list
-        if (_filtered.isEmpty)
-          EmptyState(
-            title: 'No bookings found',
-            message: 'Your upcoming and past bookings will appear here.',
-            action: ElevatedButton.icon(
-              onPressed: _showBookNowChoices,
-              icon: const Icon(Icons.add, size: 16),
-              label: const Text('Book Now'),
-            ),
-          )
-        else
-          ..._filtered.map(
-            (b) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: BookingCard(
-                booking: b,
-                onViewDetails: () => _showDetail(b),
-                onBookAgain: () => _goToTab(
-                  b.type == BookingType.appointment ? 1 : 2,
+            const SizedBox(height: 20),
+            // Tab bar
+            _buildTabBar(),
+            const SizedBox(height: 12),
+            // Booking list
+            if (_filtered.isEmpty)
+              EmptyState(
+                title: 'No bookings found',
+                message: 'Your upcoming and past bookings will appear here.',
+                action: ElevatedButton.icon(
+                  onPressed: _showBookNowChoices,
+                  icon: const Icon(Icons.add, size: 16),
+                  label: const Text('Book Now'),
+                ),
+              )
+            else
+              ..._filtered.map(
+                (b) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: BookingCard(
+                    booking: b,
+                    onViewDetails: () => _showDetail(b),
+                    onBookAgain: () =>
+                        _goToTab(b.type == BookingType.appointment ? 1 : 2),
+                  ),
                 ),
               ),
-            ),
-          ),
-      ],
+          ],
+        ),
+      ),
     );
   }
 
@@ -224,8 +223,10 @@ class _DashboardViewState extends State<DashboardView> {
             ),
             const SizedBox(height: 20),
             ListTile(
-              leading: const Icon(Icons.event_available,
-                  color: AppColors.indigo600),
+              leading: const Icon(
+                Icons.event_available,
+                color: AppColors.accent,
+              ),
               title: const Text(
                 'Book Appointment',
                 style: TextStyle(fontWeight: FontWeight.w600),
@@ -239,8 +240,10 @@ class _DashboardViewState extends State<DashboardView> {
             ),
             const Divider(height: 1),
             ListTile(
-              leading:
-                  const Icon(Icons.local_parking, color: AppColors.slate900),
+              leading: const Icon(
+                Icons.local_parking,
+                color: AppColors.slate900,
+              ),
               title: const Text(
                 'Book Parking',
                 style: TextStyle(fontWeight: FontWeight.w600),
@@ -264,7 +267,7 @@ class _DashboardViewState extends State<DashboardView> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withAlpha(8), blurRadius: 4)],
+        boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 4)],
       ),
       child: Row(
         children: [
@@ -285,7 +288,7 @@ class _DashboardViewState extends State<DashboardView> {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: active ? AppColors.slate900 : Colors.transparent,
+            color: active ? AppColors.accent : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
           ),
           alignment: Alignment.center,
@@ -304,91 +307,19 @@ class _DashboardViewState extends State<DashboardView> {
 
   void _showDetail(Booking b) {
     final isAppt = b.type == BookingType.appointment;
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => Container(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.7,
-        ),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 12),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.slate200,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Booking Summary',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.slate900,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _detailRow('Category', isAppt ? 'Appointment' : 'Parking'),
-                  _detailRow('Status', b.status.name),
-                  _detailRow('Date', formatLongDate(dateKey(b.date))),
-                  _detailRow('Time', '${b.startTime} – ${b.endTime}'),
-                  _detailRow('Reference', b.reference, mono: true),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Close'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _detailRow(String label, String value, {bool mono = false}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 13, color: AppColors.slate500),
-          ),
-          Flexible(
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.slate900,
-                fontFamily: mono ? 'monospace' : null,
-              ),
-              textAlign: TextAlign.end,
-            ),
-          ),
+      builder: (_) => BookingSummarySheet(
+        title: 'Booking Summary',
+        monoValues: const {'Reference'},
+        rows: [
+          ('Category', isAppt ? 'Appointment' : 'Parking'),
+          ('Status', b.status.name),
+          ('Date', formatLongDate(dateKey(b.date))),
+          ('Time', '${b.startTime} – ${b.endTime}'),
+          ('Reference', b.reference),
         ],
       ),
     );
