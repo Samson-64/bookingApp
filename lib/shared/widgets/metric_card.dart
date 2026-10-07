@@ -41,8 +41,8 @@ class MetricCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withAlpha(hero ? 30 : 8),
-              blurRadius: 8,
+              color: AppColors.shadow,
+              blurRadius: 10,
               offset: const Offset(0, 2),
             ),
           ],
@@ -81,10 +81,9 @@ class MetricCard extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               value,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+              style: AppType.metricValue.copyWith(
                 color: fg,
+                fontSize: hero ? 24 : 22,
               ),
             ),
             if (footer != null) ...[
