@@ -92,35 +92,40 @@ class _StaffAppointmentsViewState extends State<StaffAppointmentsView> {
       BookingHub.instance.invalidate();
       if (mounted) {
         setState(() {
-          _bookings = _bookings.map((b) => b.id == booking.id
-              ? Booking.fromMap({
-                  'id': b.id,
-                  'userId': b.userId,
-                  'type': b.type == BookingType.parking ? 'PARKING' : 'APPOINTMENT',
-                  'status': status,
-                  'date': dateKey(b.date),
-                  'startTime': b.startTime,
-                  'endTime': b.endTime,
-                  'reference': b.reference,
-                  'person': b.person?.toMap(),
-                  'parking_space': b.space != null
-                      ? {
-                          'id': b.space!.id,
-                          'name': b.space!.name,
-                          'location': b.space!.location,
-                          'available': b.space!.isAvailable,
-                        }
-                      : null,
-                })
-              : b)
-          .toList();
+          _bookings = _bookings
+              .map(
+                (b) => b.id == booking.id
+                    ? Booking.fromMap({
+                        'id': b.id,
+                        'userId': b.userId,
+                        'type': b.type == BookingType.parking
+                            ? 'PARKING'
+                            : 'APPOINTMENT',
+                        'status': status,
+                        'date': dateKey(b.date),
+                        'startTime': b.startTime,
+                        'endTime': b.endTime,
+                        'reference': b.reference,
+                        'person': b.person?.toMap(),
+                        'parking_space': b.space != null
+                            ? {
+                                'id': b.space!.id,
+                                'name': b.space!.name,
+                                'location': b.space!.location,
+                                'available': b.space!.isAvailable,
+                              }
+                            : null,
+                      })
+                    : b,
+              )
+              .toList();
         });
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
       }
     }
     if (mounted) setState(() => _busyId = null);
@@ -129,64 +134,68 @@ class _StaffAppointmentsViewState extends State<StaffAppointmentsView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Staff Portal: Schedule'),
-      ),
+      appBar: AppBar(title: const Text('Staff Portal: Schedule')),
       body: RefreshIndicator(
         onRefresh: _load,
         child: _loading
             ? const Spinner(label: 'Loading schedule…')
             : _error != null
-                ? ErrorState(message: _error!, onRetry: _load)
-                : _buildContent(),
+            ? ErrorState(message: _error!, onRetry: _load)
+            : _buildContent(),
       ),
     );
   }
 
   Widget _buildContent() {
     final filtered = _filtered;
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        Row(
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 640),
+        child: ListView(
+          padding: const EdgeInsets.all(16),
           children: [
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 4,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.indigo50,
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: const Text(
-                'Staff Authorization Active',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.indigo600,
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.emerald50,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: const Text(
+                    'Staff access active',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.emerald600,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
+            const SizedBox(height: 12),
+            const Text(
+              'Review incoming booking requests, approve pending bookings, or mark appointments completed.',
+              style: TextStyle(fontSize: 13, color: AppColors.slate500),
+            ),
+            const SizedBox(height: 16),
+            _buildTabs(),
+            const SizedBox(height: 16),
+            if (filtered.isEmpty)
+              EmptyState(
+                title: 'No ${_tab.toLowerCase()} appointments',
+                message:
+                    'No appointment records currently match this status filter.',
+                icon: Icons.schedule,
+              )
+            else
+              ...filtered.map((b) => _appointmentCard(b)),
           ],
         ),
-        const SizedBox(height: 12),
-        const Text(
-          'Review incoming booking requests, approve pending bookings, or mark appointments completed.',
-          style: TextStyle(fontSize: 13, color: AppColors.slate500),
-        ),
-        const SizedBox(height: 16),
-        _buildTabs(),
-        const SizedBox(height: 16),
-        if (filtered.isEmpty)
-          EmptyState(
-            title: 'No ${_tab.toLowerCase()} appointments',
-            message: 'No appointment records currently match this status filter.',
-            icon: Icons.schedule,
-          )
-        else
-          ...filtered.map((b) => _appointmentCard(b)),
-      ],
+      ),
     );
   }
 
@@ -212,12 +221,7 @@ class _StaffAppointmentsViewState extends State<StaffAppointmentsView> {
                   color: active ? Colors.white : Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: active
-                      ? [
-                          BoxShadow(
-                            color: Colors.black.withAlpha(8),
-                            blurRadius: 4,
-                          ),
-                        ]
+                      ? [BoxShadow(color: AppColors.shadow, blurRadius: 4)]
                       : null,
                 ),
                 alignment: Alignment.center,
@@ -229,7 +233,7 @@ class _StaffAppointmentsViewState extends State<StaffAppointmentsView> {
                         label,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 9.5,
+                          fontSize: 10.5,
                           fontWeight: FontWeight.w600,
                           color: active
                               ? AppColors.slate900
@@ -244,16 +248,14 @@ class _StaffAppointmentsViewState extends State<StaffAppointmentsView> {
                         vertical: 1,
                       ),
                       decoration: BoxDecoration(
-                        color: active
-                            ? AppColors.slate50
-                            : AppColors.slate200,
+                        color: active ? AppColors.slate50 : AppColors.slate200,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         '$count',
                         style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
                           color: active
                               ? AppColors.slate700
                               : AppColors.slate600,
@@ -278,9 +280,7 @@ class _StaffAppointmentsViewState extends State<StaffAppointmentsView> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withAlpha(8), blurRadius: 6),
-        ],
+        boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 10)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -326,7 +326,7 @@ class _StaffAppointmentsViewState extends State<StaffAppointmentsView> {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.indigo50,
+                            color: AppColors.accentLight,
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
@@ -334,7 +334,7 @@ class _StaffAppointmentsViewState extends State<StaffAppointmentsView> {
                             style: const TextStyle(
                               fontSize: 9,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.indigo600,
+                              color: AppColors.accent,
                             ),
                           ),
                         ),
@@ -343,8 +343,11 @@ class _StaffAppointmentsViewState extends State<StaffAppointmentsView> {
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        const Icon(Icons.person,
-                            size: 14, color: AppColors.slate400),
+                        const Icon(
+                          Icons.person,
+                          size: 14,
+                          color: AppColors.slate400,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           'Client: ${b.clientName ?? 'N/A'}',
@@ -360,8 +363,11 @@ class _StaffAppointmentsViewState extends State<StaffAppointmentsView> {
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          const Icon(Icons.mail_outline,
-                              size: 14, color: AppColors.slate400),
+                          const Icon(
+                            Icons.mail_outline,
+                            size: 14,
+                            color: AppColors.slate400,
+                          ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
@@ -379,8 +385,11 @@ class _StaffAppointmentsViewState extends State<StaffAppointmentsView> {
                     const SizedBox(height: 2),
                     Row(
                       children: [
-                        const Icon(Icons.schedule,
-                            size: 14, color: AppColors.slate400),
+                        const Icon(
+                          Icons.schedule,
+                          size: 14,
+                          color: AppColors.slate400,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           '${formatLongDate(dateKey(b.date))} · ${b.startTime} – ${b.endTime}',
@@ -388,6 +397,7 @@ class _StaffAppointmentsViewState extends State<StaffAppointmentsView> {
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             color: AppColors.slate700,
+                            fontFeatures: [FontFeature.tabularFigures()],
                           ),
                         ),
                       ],
@@ -395,9 +405,7 @@ class _StaffAppointmentsViewState extends State<StaffAppointmentsView> {
                     const SizedBox(height: 2),
                     Text(
                       'Ref: ${b.reference}',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        fontFamily: 'monospace',
+                      style: AppType.monoRef.copyWith(
                         color: AppColors.slate400,
                       ),
                     ),
@@ -408,21 +416,26 @@ class _StaffAppointmentsViewState extends State<StaffAppointmentsView> {
             ],
           ),
           const SizedBox(height: 12),
-          Divider(
-            height: 1,
-            color: Colors.grey.withAlpha(30),
-          ),
+          Divider(height: 1, color: AppColors.slate200),
           const SizedBox(height: 12),
           if (b.status == BookingStatus.pending)
-            _actionRow(b, busy, onPrimary: () => _updateStatus(b, 'CONFIRMED'),
-                primaryLabel: 'Accept Booking',
-                onDanger: () => _updateStatus(b, 'CANCELLED'),
-                dangerLabel: 'Cancel')
+            _actionRow(
+              b,
+              busy,
+              onPrimary: () => _updateStatus(b, 'CONFIRMED'),
+              primaryLabel: 'Accept Booking',
+              onDanger: () => _updateStatus(b, 'CANCELLED'),
+              dangerLabel: 'Cancel',
+            )
           else if (b.status == BookingStatus.confirmed)
-            _actionRow(b, busy, onPrimary: () => _updateStatus(b, 'COMPLETED'),
-                primaryLabel: 'Mark Completed',
-                onDanger: () => _updateStatus(b, 'CANCELLED'),
-                dangerLabel: 'Cancel')
+            _actionRow(
+              b,
+              busy,
+              onPrimary: () => _updateStatus(b, 'COMPLETED'),
+              primaryLabel: 'Mark Completed',
+              onDanger: () => _updateStatus(b, 'CANCELLED'),
+              dangerLabel: 'Cancel',
+            )
           else
             Row(
               children: [
@@ -436,10 +449,7 @@ class _StaffAppointmentsViewState extends State<StaffAppointmentsView> {
                     ),
                     child: const Text(
                       'No further actions available',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: AppColors.slate500,
-                      ),
+                      style: TextStyle(fontSize: 11, color: AppColors.slate500),
                     ),
                   ),
                 ),
@@ -466,7 +476,7 @@ class _StaffAppointmentsViewState extends State<StaffAppointmentsView> {
             child: ElevatedButton(
               onPressed: busy ? null : onPrimary,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.slate900,
+                backgroundColor: AppColors.accent,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
