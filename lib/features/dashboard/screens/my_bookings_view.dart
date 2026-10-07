@@ -7,9 +7,10 @@ import '../../../shared/models/booking_model.dart';
 import '../../../shared/models/user_model.dart';
 import '../../../shared/utils/format.dart';
 import '../../../shared/widgets/booking_card.dart';
+import '../../../shared/widgets/booking_summary_sheet.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_state.dart';
-import '../../../shared/widgets/spinner.dart';
+import '../../../shared/widgets/skeleton.dart';
 
 class MyBookingsView extends StatefulWidget {
   final AppUser user;
@@ -103,7 +104,7 @@ class _MyBookingsViewState extends State<MyBookingsView> {
     return RefreshIndicator(
       onRefresh: _load,
       child: _loading
-          ? const Spinner(label: 'Loading bookings…')
+          ? const BookingListSkeleton()
           : _error != null
           ? ErrorState(message: _error!, onRetry: _load)
           : _buildContent(),
@@ -111,43 +112,41 @@ class _MyBookingsViewState extends State<MyBookingsView> {
   }
 
   Widget _buildContent() {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        const Text(
-          'My Bookings',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: AppColors.slate900,
-          ),
-        ),
-        const SizedBox(height: 4),
-        const Text(
-          'Track and manage your reservations.',
-          style: TextStyle(fontSize: 13, color: AppColors.slate500),
-        ),
-        const SizedBox(height: 16),
-        _buildStatusTabs(),
-        const SizedBox(height: 12),
-        _buildTypeFilter(),
-        const SizedBox(height: 12),
-        if (_filtered.isEmpty)
-          EmptyState(
-            title: 'No ${_statusTab.label.toLowerCase()} reservations',
-            icon: Icons.bookmark_border,
-          )
-        else
-          ..._filtered.map(
-            (b) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: BookingCard(
-                booking: b,
-                onViewDetails: () => _showDetail(b),
-              ),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 640),
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            const Text('My Bookings', style: AppType.pageTitle),
+            const SizedBox(height: 4),
+            const Text(
+              'Track and manage your reservations.',
+              style: TextStyle(fontSize: 13, color: AppColors.slate500),
             ),
-          ),
-      ],
+            const SizedBox(height: 16),
+            _buildStatusTabs(),
+            const SizedBox(height: 12),
+            _buildTypeFilter(),
+            const SizedBox(height: 12),
+            if (_filtered.isEmpty)
+              EmptyState(
+                title: 'No ${_statusTab.label.toLowerCase()} reservations',
+                icon: Icons.bookmark_border,
+              )
+            else
+              ..._filtered.map(
+                (b) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: BookingCard(
+                    booking: b,
+                    onViewDetails: () => _showDetail(b),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -169,7 +168,7 @@ class _MyBookingsViewState extends State<MyBookingsView> {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
-                  color: active ? AppColors.slate900 : Colors.transparent,
+                  color: active ? AppColors.accent : Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 alignment: Alignment.center,
@@ -200,8 +199,8 @@ class _MyBookingsViewState extends State<MyBookingsView> {
                         child: Text(
                           '$count',
                           style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
                             color: active ? Colors.white : AppColors.slate900,
                           ),
                         ),
@@ -228,7 +227,7 @@ class _MyBookingsViewState extends State<MyBookingsView> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
-                color: active ? AppColors.slate900 : Colors.white,
+                color: active ? AppColors.accent : Colors.white,
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Text(
@@ -248,90 +247,22 @@ class _MyBookingsViewState extends State<MyBookingsView> {
 
   void _showDetail(Booking b) {
     final isAppt = b.type == BookingType.appointment;
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => Container(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.7,
-        ),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 12),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.slate200,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Booking Details',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.slate900,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _row('Category', isAppt ? 'Appointment' : 'Parking'),
-                  _row('Status', b.status.name.toUpperCase()),
-                  _row('Date', formatLongDate(dateKey(b.date))),
-                  _row('Time', '${b.startTime} – ${b.endTime}'),
-                  _row('Reference', b.reference),
-                  if (b.person != null) _row('Provider', b.person!.name),
-                  if (b.space != null)
-                    _row('Space', '${b.space!.name} (${b.space!.location})'),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Close'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _row(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 13, color: AppColors.slate500),
-          ),
-          Flexible(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.slate900,
-              ),
-              textAlign: TextAlign.end,
-            ),
-          ),
+      builder: (_) => BookingSummarySheet(
+        title: 'Booking Details',
+        monoValues: const {'Reference'},
+        rows: [
+          ('Category', isAppt ? 'Appointment' : 'Parking'),
+          ('Status', b.status.name),
+          ('Date', formatLongDate(dateKey(b.date))),
+          ('Time', '${b.startTime} – ${b.endTime}'),
+          ('Reference', b.reference),
+          if (b.person != null) ('Provider', b.person!.name),
+          if (b.space != null)
+            ('Space', '${b.space!.name} (${b.space!.location})'),
         ],
       ),
     );
