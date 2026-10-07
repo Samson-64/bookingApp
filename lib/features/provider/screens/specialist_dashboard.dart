@@ -8,8 +8,8 @@ import '../../../shared/models/user_model.dart';
 import '../../../shared/utils/format.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/error_state.dart';
+import '../../../shared/widgets/skeleton.dart';
 import '../../../shared/widgets/metric_card.dart';
-import '../../../shared/widgets/spinner.dart';
 import '../../../shared/widgets/status_badge.dart';
 
 class ProviderDashboardView extends StatefulWidget {
@@ -143,111 +143,115 @@ class _ProviderDashboardViewState extends State<ProviderDashboardView> {
 
     return RefreshIndicator(
       onRefresh: _loadBookings,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Header
-          Row(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 640),
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: const BoxDecoration(
-                  color: AppColors.indigo600,
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Provider Dashboard',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.slate900,
-                      ),
+              // Header
+              Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: const BoxDecoration(
+                      color: AppColors.accent,
+                      shape: BoxShape.circle,
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Welcome back, ${user.name}',
+                    alignment: Alignment.center,
+                    child: Text(
+                      user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
                       style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.slate500,
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Provider Dashboard',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.slate900,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Welcome back, ${user.name}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.slate500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
+              const SizedBox(height: 16),
+
+              // Metric cards
+              Row(
+                children: [
+                  Expanded(
+                    child: MetricCard(
+                      label: 'Pending review',
+                      value: '${_count('PENDING')}',
+                      icon: Icons.assignment_outlined,
+                      iconBg: AppColors.amber50,
+                      iconFg: AppColors.amber600,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: MetricCard(
+                      label: 'Upcoming confirmed',
+                      value: '$_upcomingConfirmed',
+                      icon: Icons.calendar_month_outlined,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              MetricCard(
+                label: 'Total assigned',
+                value: '${_count('ALL')}',
+                icon: Icons.group_outlined,
+                iconBg: AppColors.accentLight,
+                iconFg: AppColors.accent,
+              ),
+              const SizedBox(height: 20),
+
+              // Tabs
+              _buildTabs(),
+              const SizedBox(height: 16),
+
+              if (_loading)
+                const BookingListSkeleton()
+              else if (_error != null) ErrorState(message: _error!, onRetry: _loadBookings)
+              else if (_filtered.isEmpty)
+                EmptyState(
+                  title: _tab == 'ALL'
+                      ? 'No appointments assigned yet'
+                      : 'No ${_tab.toLowerCase()} appointments',
+                  message: _tab == 'ALL'
+                      ? 'When a client books an appointment with you, it will appear here for you to review and update.'
+                      : 'No appointment records currently match this status filter.',
+                  icon: Icons.event_available_outlined,
+                )
+              else
+                ..._filtered.map((b) => _appointmentCard(b)),
             ],
           ),
-          const SizedBox(height: 16),
-
-          // Metric cards
-          Row(
-            children: [
-              Expanded(
-                child: MetricCard(
-                  label: 'PENDING REVIEW',
-                  value: '${_count('PENDING')}',
-                  icon: Icons.assignment_outlined,
-                  iconBg: AppColors.amber50,
-                  iconFg: AppColors.amber600,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: MetricCard(
-                  label: 'UPCOMING \nCONFIRMED',
-                  value: '$_upcomingConfirmed',
-                  icon: Icons.calendar_month_outlined,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          MetricCard(
-            label: 'TOTAL ASSIGNED',
-            value: '${_count('ALL')}',
-            icon: Icons.group_outlined,
-            iconBg: AppColors.indigo50,
-            iconFg: AppColors.indigo600,
-          ),
-          const SizedBox(height: 20),
-
-          // Tabs
-          _buildTabs(),
-          const SizedBox(height: 16),
-
-          if (_loading)
-            const Spinner(label: 'Loading your appointments…')
-          else if (_error != null)
-            ErrorState(message: _error!, onRetry: _loadBookings)
-          else if (_filtered.isEmpty)
-            EmptyState(
-              title: _tab == 'ALL'
-                  ? 'No appointments assigned yet'
-                  : 'No ${_tab.toLowerCase()} appointments',
-              message: _tab == 'ALL'
-                  ? 'When a client books an appointment with you, it will appear here for you to review and update.'
-                  : 'No appointment records currently match this status filter.',
-              icon: Icons.event_available_outlined,
-            )
-          else
-            ..._filtered.map((b) => _appointmentCard(b)),
-        ],
+        ),
       ),
     );
   }
@@ -273,12 +277,7 @@ class _ProviderDashboardViewState extends State<ProviderDashboardView> {
                   color: active ? Colors.white : Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: active
-                      ? [
-                          BoxShadow(
-                            color: Colors.black.withAlpha(8),
-                            blurRadius: 4,
-                          ),
-                        ]
+                      ? [BoxShadow(color: AppColors.shadow, blurRadius: 4)]
                       : null,
                 ),
                 alignment: Alignment.center,
@@ -306,7 +305,7 @@ class _ProviderDashboardViewState extends State<ProviderDashboardView> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withAlpha(8), blurRadius: 6)],
+        boxShadow: [BoxShadow(color: AppColors.shadow, blurRadius: 10)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -352,15 +351,15 @@ class _ProviderDashboardViewState extends State<ProviderDashboardView> {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.indigo50,
+                            color: AppColors.accentLight,
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             b.person?.position ?? 'Provider',
                             style: const TextStyle(
-                              fontSize: 9,
+                              fontSize: 10,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.indigo600,
+                              color: AppColors.accent,
                             ),
                           ),
                         ),
@@ -424,6 +423,7 @@ class _ProviderDashboardViewState extends State<ProviderDashboardView> {
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                               color: AppColors.slate700,
+                              fontFeatures: [FontFeature.tabularFigures()],
                             ),
                           ),
                         ),
@@ -432,9 +432,7 @@ class _ProviderDashboardViewState extends State<ProviderDashboardView> {
                     const SizedBox(height: 2),
                     Text(
                       'Ref: ${b.reference}',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        fontFamily: 'monospace',
+                      style: AppType.monoRef.copyWith(
                         color: AppColors.slate400,
                       ),
                     ),
@@ -445,7 +443,7 @@ class _ProviderDashboardViewState extends State<ProviderDashboardView> {
             ],
           ),
           const SizedBox(height: 12),
-          Divider(height: 1, color: Colors.grey.withAlpha(30)),
+          Divider(height: 1, color: AppColors.slate200),
           const SizedBox(height: 12),
           if (b.status == BookingStatus.pending)
             _actionRow(
@@ -483,7 +481,7 @@ class _ProviderDashboardViewState extends State<ProviderDashboardView> {
             child: ElevatedButton(
               onPressed: busy ? null : onPrimary,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.slate900,
+                backgroundColor: AppColors.accent,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
