@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import '../../app/theme.dart';
 import '../models/booking_model.dart';
@@ -19,9 +20,9 @@ class BookingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isAppt = booking.type == BookingType.appointment;
-    final chipColor = isAppt ? AppColors.indigo600 : AppColors.slate900;
+    final chipColor = isAppt ? AppColors.accent : AppColors.slate900;
     final chipLabel = isAppt ? 'Provider' : 'Parking Bay';
-    final chipBg = isAppt ? AppColors.indigo50 : AppColors.slate100;
+    final chipBg = isAppt ? AppColors.accentLight : AppColors.slate100;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -30,8 +31,8 @@ class BookingCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(8),
-            blurRadius: 6,
+            color: AppColors.shadow,
+            blurRadius: 10,
             offset: const Offset(0, 2),
           ),
         ],
@@ -135,6 +136,7 @@ class BookingCard extends StatelessWidget {
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: AppColors.slate700,
+                    fontFeatures: [FontFeature.tabularFigures()],
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -144,7 +146,7 @@ class BookingCard extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: isAppt ? AppColors.indigo50 : AppColors.slate50,
+                    color: isAppt ? AppColors.accentLight : AppColors.slate50,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
@@ -153,7 +155,7 @@ class BookingCard extends StatelessWidget {
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
                       color: isAppt
-                          ? AppColors.indigo600
+                          ? AppColors.accent
                           : AppColors.slate600,
                     ),
                   ),
@@ -172,7 +174,7 @@ class BookingCard extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: onViewDetails,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.slate900,
+                          backgroundColor: AppColors.accent,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
