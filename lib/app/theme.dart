@@ -17,7 +17,7 @@ abstract final class AppColors {
 
   static const Color accentLight = Color(0xFFF2F7FD);
   static const Color accent100 = Color(0xFFE3ECF7);
-  static const Color accent = Color(0xFF102C67);
+  static const Color accent = Color(0xFF0F172A);
   static const Color navy = Color(0xFF062B5E);
   static const Color accentDeep = Color(0xFF071827);
 
